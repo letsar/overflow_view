@@ -17,18 +17,58 @@ typedef OverflowIndicatorBuilder = Widget Function(
 class OverflowView extends MultiChildRenderObjectWidget {
   /// Creates an [OverflowView].
   ///
+  /// All children will have the same size has the first child.
+  ///
   /// The [builder], [spacing] and [children] arguments must not be null.
   /// The [spacing] argument must also be positive and finite.
   OverflowView({
     Key key,
     @required OverflowIndicatorBuilder builder,
+    Axis direction = Axis.horizontal,
+    @required List<Widget> children,
+    double spacing = 0,
+  }) : this._all(
+          key: key,
+          builder: builder,
+          direction: direction,
+          children: children,
+          spacing: spacing,
+          layoutBehavior: OverflowViewLayoutBehavior.fixed,
+        );
+
+  /// Creates a flexible [OverflowView].
+  ///
+  /// All children can have their own size.
+  ///
+  /// The [builder], [spacing] and [children] arguments must not be null.
+  /// The [spacing] argument must also be positive and finite.
+  OverflowView.flexible({
+    Key key,
+    @required OverflowIndicatorBuilder builder,
+    Axis direction = Axis.horizontal,
+    @required List<Widget> children,
+    double spacing = 0,
+  }) : this._all(
+          key: key,
+          builder: builder,
+          direction: direction,
+          children: children,
+          spacing: spacing,
+          layoutBehavior: OverflowViewLayoutBehavior.flexible,
+        );
+
+  OverflowView._all({
+    Key key,
+    @required OverflowIndicatorBuilder builder,
     this.direction = Axis.horizontal,
     @required List<Widget> children,
     this.spacing = 0,
+    OverflowViewLayoutBehavior layoutBehavior,
   })  : assert(builder != null),
         assert(direction != null),
         assert(children != null),
         assert(spacing != null && spacing >= 0 && spacing < double.infinity),
+        _layoutBehavior = layoutBehavior,
         super(
           key: key,
           children: [
@@ -50,11 +90,19 @@ class OverflowView extends MultiChildRenderObjectWidget {
   /// The amount of space between successive children.
   final double spacing;
 
+  final OverflowViewLayoutBehavior _layoutBehavior;
+
+  @override
+  _OverflowViewElement createElement() {
+    return _OverflowViewElement(this);
+  }
+
   @override
   RenderOverflowView createRenderObject(BuildContext context) {
     return RenderOverflowView(
       direction: direction,
       spacing: spacing,
+      layoutBehavior: _layoutBehavior,
     );
   }
 
@@ -65,6 +113,20 @@ class OverflowView extends MultiChildRenderObjectWidget {
   ) {
     renderObject
       ..direction = direction
-      ..spacing = spacing;
+      ..spacing = spacing
+      ..layoutBehavior = _layoutBehavior;
+  }
+}
+
+class _OverflowViewElement extends MultiChildRenderObjectElement {
+  _OverflowViewElement(OverflowView widget) : super(widget);
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children.forEach((element) {
+      if (element.renderObject.isOnstage) {
+        visitor(element);
+      }
+    });
   }
 }

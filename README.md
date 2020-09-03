@@ -6,6 +6,7 @@ A widget displaying children in a line with an overflow indicator at the end if 
 ## Features
 * Renders children horizontally or vertically.
 * Has an overflow indicator builder so that you can display a widget showing the number of elements not rendered.
+* Can either constrain the children to the size of the first child or let them have the size they want.
 
 ![Overview][overview]
 
@@ -55,6 +56,14 @@ OverflowView(
   },
 )
 ```
+
+### Constructors
+
+There are two constuctors depending on what you want to do.
+
+The `OverflowView` constructor will constrain all children to have the same size as the first one. This can be used for an avatar list for example.
+
+The `OverflowView.flexible` constructor will let all children to determine their own size. This is less performant than the default one, but it's more flexible. This can be used for a menu bar for example.
 
 ## Sponsoring
 
