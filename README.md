@@ -7,6 +7,7 @@ A widget displaying children in a line with an overflow indicator at the end if 
 * Renders children horizontally or vertically.
 * Has an overflow indicator builder so that you can display a widget showing the number of elements not rendered.
 * Can either constrain the children to the size of the first child or let them have the size they want.
+* Children can overlap each other by setting a negative spacing.
 
 ![Overview][overview]
 
