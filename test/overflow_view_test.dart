@@ -333,6 +333,37 @@ void main() {
   );
 
   testWidgets(
+    'spacing can be negative for overlapping effect',
+    (tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 110,
+              width: 110,
+              child: OverflowView(
+                spacing: -10,
+                builder: (context, count) {
+                  return const SizedBox();
+                },
+                children: [
+                  const _Text('A'),
+                  const _Text('B'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+      expect(tester.getTopLeft(find.text('B')), const Offset(40, 0));
+    },
+  );
+
+  testWidgets(
     'OverflowView.flexible should build builder twice if there is not enough room for it the first time',
     (tester) async {
       int buildCount = 0;

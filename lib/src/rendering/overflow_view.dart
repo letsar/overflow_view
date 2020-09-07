@@ -23,7 +23,9 @@ class RenderOverflowView extends RenderBox
     double spacing,
     OverflowViewLayoutBehavior layoutBehavior,
   })  : assert(direction != null),
-        assert(spacing != null && spacing >= 0 && spacing < double.infinity),
+        assert(spacing != null &&
+            spacing > double.negativeInfinity &&
+            spacing < double.infinity),
         assert(layoutBehavior != null),
         _direction = direction,
         _spacing = spacing,
@@ -46,7 +48,9 @@ class RenderOverflowView extends RenderBox
   double get spacing => _spacing;
   double _spacing;
   set spacing(double value) {
-    assert(value != null && value >= 0 && value < double.infinity);
+    assert(value != null &&
+        value > double.negativeInfinity &&
+        value < double.infinity);
     if (_spacing != value) {
       _spacing = value;
       markNeedsLayout();

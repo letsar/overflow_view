@@ -75,8 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(fontSize: 20),
               ),
               SizedBox(height: 20),
-              OverflowView(
-                spacing: 4,
+              OverflowView.flexible(
+                spacing: -40,
                 children: <Widget>[
                   for (int i = 0; i < _counter; i++)
                     AvatarWidget(
@@ -273,7 +273,7 @@ class CommandBar extends StatelessWidget {
     ];
 
     return OverflowView.flexible(
-      spacing: 4,
+      spacing: -4,
       children: [...commands.map((e) => _MenuItem(data: e))],
       builder: (context, remaining) {
         return PopupMenuButton<String>(

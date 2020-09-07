@@ -67,7 +67,9 @@ class OverflowView extends MultiChildRenderObjectWidget {
   })  : assert(builder != null),
         assert(direction != null),
         assert(children != null),
-        assert(spacing != null && spacing >= 0 && spacing < double.infinity),
+        assert(spacing != null &&
+            spacing > double.negativeInfinity &&
+            spacing < double.infinity),
         _layoutBehavior = layoutBehavior,
         super(
           key: key,
