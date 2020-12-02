@@ -73,7 +73,7 @@ void main() {
   );
 
   testWidgets(
-    'the overflow indicator is not built if there is enough room',
+    'the overflow indicator is not built if there is enough room (except for flexible)',
     (tester) async {
       int buildCount = 0;
       await tester.pumpWidget(
@@ -106,7 +106,7 @@ void main() {
           ),
         ),
       );
-      expect(buildCount, 0);
+      expect(buildCount, 1);
     },
   );
 
@@ -399,6 +399,47 @@ void main() {
       expect(find.text('B'), findsNothing);
       expect(find.text('C'), findsNothing);
       expect(find.text('E'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'unmount successfully the overflow indicator once it has already been laid '
+    'out with .flexible()',
+    (tester) async {
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 100,
+            child: OverflowView.flexible(
+              builder: (context, count) {
+                return const SizedBox(width: 30);
+              },
+              children: [
+                const SizedBox(width: 50),
+                const SizedBox(width: 20),
+                const SizedBox(width: 50),
+                const SizedBox(width: 50),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 100,
+            child: OverflowView.flexible(
+              builder: (context, count) {
+                return const SizedBox(width: 30);
+              },
+              children: [
+                const SizedBox(width: 50),
+              ],
+            ),
+          ),
+        ),
+      );
     },
   );
 }

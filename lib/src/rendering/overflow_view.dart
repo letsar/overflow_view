@@ -295,6 +295,19 @@ class RenderOverflowView extends RenderBox
       // We layout all children. We need to adjust the offset used to compute
       // the final size.
       offset -= spacing;
+
+      // We need to layout the overflowIndicator because we may have already
+      // laid it out with parentUsesSize: true before.
+      // When unmounting a _LayoutBuilderElement, it calls markNeedsLayout
+      // a last time, and can cause error.
+      lastChild.layout(BoxValueConstraints<int>(
+        value: unrenderedChildCount,
+        constraints: childConstraints,
+      ));
+
+      // Because the overflow indicator will be paint outside of the screen,
+      // we need to say that there is an overflow.
+      _hasOverflow = true;
     }
 
     final double crossSize = renderBoxes.fold(
@@ -344,7 +357,12 @@ class RenderOverflowView extends RenderBox
     void paintChild(RenderObject child) {
       final OverflowViewParentData childParentData =
           child.parentData as OverflowViewParentData;
-      context.paintChild(child, childParentData.offset + offset);
+      if (childParentData.offstage == false) {
+        context.paintChild(child, childParentData.offset + offset);
+      } else {
+        // We paint it outside the box.
+        context.paintChild(child, size.bottomRight(Offset.zero));
+      }
     }
 
     void defaultPaint(PaintingContext context, Offset offset) {
