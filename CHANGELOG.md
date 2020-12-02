@@ -1,6 +1,6 @@
 ## 0.2.2
 ### Fixed
-* [Issue when hiding rendering overflow indicator after having displayed it.](https://github.com/letsar/overflow_view/issues/3)
+* [Issue when rendering overflow indicator after having displayed it once.](https://github.com/letsar/overflow_view/issues/3)
 
 ## 0.2.1
 ### Changed
