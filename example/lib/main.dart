@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -187,10 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class AvatarOverview extends StatelessWidget {
   AvatarOverview({
-    Key key,
-    @required int remaining,
-    @required int position,
-    @required int counter,
+    Key? key,
+    required int remaining,
+    required int position,
+    required int counter,
   })  : index = counter - remaining + position,
         alignment = _getAlignment(position),
         super(key: key);
@@ -231,9 +231,9 @@ class AvatarOverview extends StatelessWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    Key key,
-    this.text,
-    this.color,
+    Key?  key,
+    required this.text,
+    required this.color,
   }) : super(key: key);
 
   final String text;
@@ -255,7 +255,7 @@ class AvatarWidget extends StatelessWidget {
 
 class CommandBar extends StatelessWidget {
   const CommandBar({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -295,20 +295,20 @@ class CommandBar extends StatelessWidget {
 
 class MenuItemData {
   const MenuItemData({
-    @required this.id,
+    required this.id,
     this.label,
     this.icon,
   });
 
   final String id;
-  final String label;
-  final IconData icon;
+  final String? label;
+  final IconData? icon;
 }
 
 class _MenuItem extends StatelessWidget {
   const _MenuItem({
-    Key key,
-    @required this.data,
+    Key? key,
+    required this.data,
   }) : super(key: key);
 
   final MenuItemData data;
@@ -321,7 +321,7 @@ class _MenuItem extends StatelessWidget {
         children: [
           if (data.icon != null) Icon(data.icon),
           if (data.icon != null && data.label != null) SizedBox(width: 8),
-          if (data.label != null) Text(data.label),
+          if (data.label != null) Text(data.label!),
         ],
       ),
     );

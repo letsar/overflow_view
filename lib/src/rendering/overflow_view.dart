@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 /// Parent data for use with [RenderOverflowView].
 class OverflowViewParentData extends ContainerBoxParentData<RenderBox> {
-  bool offstage;
+  bool? offstage;
 }
 
 enum OverflowViewLayoutBehavior {
@@ -18,15 +18,12 @@ class RenderOverflowView extends RenderBox
         ContainerRenderObjectMixin<RenderBox, OverflowViewParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, OverflowViewParentData> {
   RenderOverflowView({
-    List<RenderBox> children,
-    Axis direction,
-    double spacing,
-    OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(direction != null),
-        assert(spacing != null &&
-            spacing > double.negativeInfinity &&
+    List<RenderBox>? children,
+    required Axis direction,
+    required double spacing,
+    required OverflowViewLayoutBehavior layoutBehavior,
+  })  : assert(spacing > double.negativeInfinity &&
             spacing < double.infinity),
-        assert(layoutBehavior != null),
         _direction = direction,
         _spacing = spacing,
         _layoutBehavior = layoutBehavior,
@@ -34,10 +31,19 @@ class RenderOverflowView extends RenderBox
     addAll(children);
   }
 
-  Axis get direction => _direction;
   Axis _direction;
+
+  double _spacing;
+
+  OverflowViewLayoutBehavior _layoutBehavior;
+
+  bool _isHorizontal;
+
+  bool _hasOverflow = false;
+
+  Axis get direction => _direction;
+
   set direction(Axis value) {
-    assert(value != null);
     if (_direction != value) {
       _direction = value;
       _isHorizontal = direction == Axis.horizontal;
@@ -46,10 +52,9 @@ class RenderOverflowView extends RenderBox
   }
 
   double get spacing => _spacing;
-  double _spacing;
+
   set spacing(double value) {
-    assert(value != null &&
-        value > double.negativeInfinity &&
+    assert(value > double.negativeInfinity &&
         value < double.infinity);
     if (_spacing != value) {
       _spacing = value;
@@ -58,7 +63,7 @@ class RenderOverflowView extends RenderBox
   }
 
   OverflowViewLayoutBehavior get layoutBehavior => _layoutBehavior;
-  OverflowViewLayoutBehavior _layoutBehavior;
+
   set layoutBehavior(OverflowViewLayoutBehavior value) {
     if (_layoutBehavior != value) {
       _layoutBehavior = value;
@@ -66,11 +71,9 @@ class RenderOverflowView extends RenderBox
     }
   }
 
-  bool _isHorizontal;
-
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! OverflowViewParentData)
+    if (child.parentData is !OverflowViewParentData)
       child.parentData = OverflowViewParentData();
   }
 
@@ -81,7 +84,6 @@ class RenderOverflowView extends RenderBox
       case Axis.vertical:
         return child.size.width;
     }
-    return null;
   }
 
   double _getMainSize(RenderBox child) {
@@ -91,10 +93,7 @@ class RenderOverflowView extends RenderBox
       case Axis.vertical:
         return child.size.height;
     }
-    return null;
   }
-
-  bool _hasOverflow = false;
 
   @override
   void performLayout() {
@@ -117,7 +116,7 @@ class RenderOverflowView extends RenderBox
   }
 
   void performFixedLayout() {
-    RenderBox child = firstChild;
+    RenderBox child = firstChild!;
     final BoxConstraints childConstraints = constraints.loosen();
     final double maxExtent =
         _isHorizontal ? constraints.maxWidth : constraints.maxHeight;
@@ -149,14 +148,14 @@ class RenderOverflowView extends RenderBox
     final int renderedChildCount = requestedExtent <= maxExtent
         ? count
         : (maxExtent + spacing) ~/ childStride - 1;
-    final int unrenderedChildCount = count - renderedChildCount;
+    final int unRenderedChildCount = count - renderedChildCount;
     if (renderedChildCount > 0) {
       childParentData.offstage = false;
       onstageCount++;
     }
-    int i;
-    for (i = 1; i < renderedChildCount; i++) {
-      child = childParentData.nextSibling;
+
+    for (int i = 1; i < renderedChildCount; i++) {
+      child = childParentData.nextSibling!;
       childParentData = child.parentData as OverflowViewParentData;
       child.layout(otherChildConstraints);
       childParentData.offset = getChildOffset(i);
@@ -165,23 +164,23 @@ class RenderOverflowView extends RenderBox
     }
 
     while (child != lastChild) {
-      child = childParentData.nextSibling;
+      child = childParentData.nextSibling!;
       childParentData = child.parentData as OverflowViewParentData;
       childParentData.offstage = true;
     }
 
-    if (unrenderedChildCount > 0) {
+    if (unRenderedChildCount > 0) {
       // We have to layout the overflow indicator.
-      final RenderBox overflowIndicator = lastChild;
+      final RenderBox? overflowIndicator = lastChild;
 
       final BoxValueConstraints<int> overflowIndicatorConstraints =
           BoxValueConstraints<int>(
-        value: unrenderedChildCount,
+        value: unRenderedChildCount,
         constraints: otherChildConstraints,
       );
-      overflowIndicator.layout(overflowIndicatorConstraints);
+      overflowIndicator?.layout(overflowIndicatorConstraints);
       final OverflowViewParentData overflowIndicatorParentData =
-          overflowIndicator.parentData as OverflowViewParentData;
+          overflowIndicator?.parentData as OverflowViewParentData;
       overflowIndicatorParentData.offset = getChildOffset(renderedChildCount);
       overflowIndicatorParentData.offstage = false;
       onstageCount++;
@@ -196,9 +195,9 @@ class RenderOverflowView extends RenderBox
   }
 
   void performFlexibleLayout() {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     List<RenderBox> renderBoxes = <RenderBox>[];
-    int unrenderedChildCount = childCount - 1;
+    int unRenderedChildCount = childCount - 1;
     double availableExtent =
         _isHorizontal ? constraints.maxWidth : constraints.maxHeight;
     double offset = 0;
@@ -212,13 +211,13 @@ class RenderOverflowView extends RenderBox
     bool showOverflowIndicator = false;
     while (child != lastChild) {
       final OverflowViewParentData childParentData =
-          child.parentData as OverflowViewParentData;
+          child?.parentData as OverflowViewParentData;
 
-      child.layout(childConstraints, parentUsesSize: true);
+      child?.layout(childConstraints, parentUsesSize: true);
 
-      final double childMainSize = _getMainSize(child);
+      final double childMainSize = child != null ? _getMainSize(child) : 0;
 
-      if (childMainSize <= availableExtent) {
+      if (childMainSize <= availableExtent && child != null) {
         // We have room to paint this child.
         renderBoxes.add(child);
         childParentData.offstage = false;
@@ -228,7 +227,7 @@ class RenderOverflowView extends RenderBox
         final double childStride = spacing + childMainSize;
         offset += childStride;
         availableExtent -= childStride;
-        unrenderedChildCount--;
+        unRenderedChildCount--;
         child = childParentData.nextSibling;
       } else {
         // We have no room to paint any further child.
@@ -239,18 +238,18 @@ class RenderOverflowView extends RenderBox
 
     if (showOverflowIndicator) {
       // We didn't layout all the children.
-      final RenderBox overflowIndicator = lastChild;
+      final RenderBox? overflowIndicator = lastChild;
       final BoxValueConstraints<int> overflowIndicatorConstraints =
           BoxValueConstraints<int>(
-        value: unrenderedChildCount,
-        constraints: childConstraints,
+        value: unRenderedChildCount,
+        constraints: childConstraints as BoxConstraints,
       );
-      overflowIndicator.layout(
+      overflowIndicator?.layout(
         overflowIndicatorConstraints,
         parentUsesSize: true,
       );
 
-      final double childMainSize = _getMainSize(overflowIndicator);
+      final double childMainSize = overflowIndicator != null ? _getMainSize(overflowIndicator) : 0;
 
       // We need to remove the children that prevent the overflowIndicator
       // to paint.
@@ -262,7 +261,7 @@ class RenderOverflowView extends RenderBox
         final double childStride = _getMainSize(child) + spacing;
 
         availableExtent += childStride;
-        unrenderedChildCount++;
+        unRenderedChildCount++;
         offset -= childStride;
       }
 
@@ -271,19 +270,19 @@ class RenderOverflowView extends RenderBox
         _hasOverflow = true;
       }
 
-      if (overflowIndicatorConstraints.value != unrenderedChildCount) {
+      if (overflowIndicatorConstraints.value != unRenderedChildCount && overflowIndicator != null) {
         // The number of unrendered child changed, we have to layout the
         // indicator another time.
         overflowIndicator.layout(
           BoxValueConstraints<int>(
-            value: unrenderedChildCount,
+            value: unRenderedChildCount,
             constraints: childConstraints,
           ),
           parentUsesSize: true,
         );
       }
 
-      renderBoxes.add(overflowIndicator);
+      renderBoxes.add(overflowIndicator!);
 
       final OverflowViewParentData overflowIndicatorParentData =
           overflowIndicator.parentData as OverflowViewParentData;
@@ -300,9 +299,9 @@ class RenderOverflowView extends RenderBox
       // laid it out with parentUsesSize: true before.
       // When unmounting a _LayoutBuilderElement, it calls markNeedsLayout
       // a last time, and can cause error.
-      lastChild.layout(BoxValueConstraints<int>(
-        value: unrenderedChildCount,
-        constraints: childConstraints,
+      lastChild?.layout(BoxValueConstraints<int>(
+        value: unRenderedChildCount,
+        constraints: childConstraints as BoxConstraints,
       ));
 
       // Because the overflow indicator will be paint outside of the screen,
@@ -383,13 +382,13 @@ class RenderOverflowView extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     // The x, y parameters have the top left of the node's box as the origin.
     visitOnlyOnStageChildren((renderObject) {
       final RenderBox child = renderObject as RenderBox;
       final OverflowViewParentData childParentData =
           child.parentData as OverflowViewParentData;
-      final bool isHit = result.addWithPaintOffset(
+      result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
@@ -397,9 +396,6 @@ class RenderOverflowView extends RenderBox
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit) {
-        return true;
-      }
     });
 
     return false;
