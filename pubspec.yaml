@@ -15,3 +15,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+dependency_overrides:
+  value_layout_builder:
+    git:
+      url: https://github.com/voyages-sncf-technologies/value_layout_builder.git
+      ref: null-safety
