@@ -40,7 +40,6 @@ class OverflowView extends MultiChildRenderObjectWidget {
   ///
   /// All children can have their own size.
   ///
-  /// The [builder], [spacing] and [children] arguments must not be null.
   /// The [spacing] argument must also be positive and finite.
   OverflowView.flexible({
     Key? key,
