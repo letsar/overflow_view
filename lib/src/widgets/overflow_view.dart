@@ -19,7 +19,6 @@ class OverflowView extends MultiChildRenderObjectWidget {
   ///
   /// All children will have the same size has the first child.
   ///
-  /// The [builder], [spacing] and [children] arguments must not be null.
   /// The [spacing] argument must also be positive and finite.
   OverflowView({
     Key? key,
