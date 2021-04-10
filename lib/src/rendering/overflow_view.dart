@@ -22,8 +22,7 @@ class RenderOverflowView extends RenderBox
     required Axis direction,
     required double spacing,
     required OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(spacing > double.negativeInfinity &&
-            spacing < double.infinity),
+  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
         _direction = direction,
         _spacing = spacing,
         _layoutBehavior = layoutBehavior,
@@ -44,8 +43,7 @@ class RenderOverflowView extends RenderBox
   double get spacing => _spacing;
   double _spacing;
   set spacing(double value) {
-    assert(value > double.negativeInfinity &&
-        value < double.infinity);
+    assert(value > double.negativeInfinity && value < double.infinity);
     if (_spacing != value) {
       _spacing = value;
       markNeedsLayout();
@@ -60,6 +58,7 @@ class RenderOverflowView extends RenderBox
       markNeedsLayout();
     }
   }
+
   bool _isHorizontal;
   @override
   void setupParentData(RenderBox child) {
@@ -262,7 +261,7 @@ class RenderOverflowView extends RenderBox
         _hasOverflow = true;
       }
 
-      if (overflowIndicatorConstraints.value != unRenderedChildCount && overflowIndicator != null) {
+      if (overflowIndicatorConstraints.value != unRenderedChildCount) {
         // The number of unrendered child changed, we have to layout the
         // indicator another time.
         overflowIndicator.layout(
@@ -293,7 +292,7 @@ class RenderOverflowView extends RenderBox
       // a last time, and can cause error.
       lastChild?.layout(BoxValueConstraints<int>(
         value: unRenderedChildCount,
-        constraints: childConstraints as BoxConstraints,
+        constraints: childConstraints,
       ));
 
       // Because the overflow indicator will be paint outside of the screen,

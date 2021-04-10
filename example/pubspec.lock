@@ -87,7 +87,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.3.0"
+    version: "0.3.1"
   path:
     dependency: transitive
     description:
@@ -155,7 +155,7 @@ packages:
       name: value_layout_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   vector_math:
     dependency: transitive
     description:

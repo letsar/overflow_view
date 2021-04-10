@@ -1,3 +1,7 @@
+## 0.3.1
+### Changed
+* Small formatting issues.
+
 ## 0.3.0
 ### Changed
 * Add support for null-safety.
