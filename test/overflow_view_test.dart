@@ -4,73 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:overflow_view/overflow_view.dart';
 
 void main() {
-  test(
-    'throws if builder is null',
-    () {
-      expect(
-        () => OverflowView(
-          builder: null,
-          children: [],
-          direction: Axis.vertical,
-        ),
-        throwsAssertionError,
-      );
-
-      expect(
-        () => OverflowView.flexible(
-          builder: null,
-          children: [],
-          direction: Axis.vertical,
-        ),
-        throwsAssertionError,
-      );
-    },
-  );
-
-  test(
-    'throws if children is null',
-    () {
-      expect(
-        () => OverflowView(
-          builder: (x, y) => null,
-          children: null,
-          direction: Axis.vertical,
-        ),
-        throwsAssertionError,
-      );
-
-      expect(
-        () => OverflowView.flexible(
-          builder: (x, y) => null,
-          children: null,
-          direction: Axis.vertical,
-        ),
-        throwsAssertionError,
-      );
-    },
-  );
-  test(
-    'throws if direction is null',
-    () {
-      expect(
-        () => OverflowView(
-          builder: (x, y) => null,
-          children: [],
-          direction: null,
-        ),
-        throwsAssertionError,
-      );
-
-      expect(
-        () => OverflowView.flexible(
-          builder: (x, y) => null,
-          children: [],
-          direction: null,
-        ),
-        throwsAssertionError,
-      );
-    },
-  );
 
   testWidgets(
     'the overflow indicator is not built if there is enough room (except for flexible)',
@@ -114,7 +47,7 @@ void main() {
     'the overflow indicator is built if there is not enough room',
     (tester) async {
       int buildCount = 0;
-      int remainingCount;
+      late int remainingCount;
       await tester.pumpWidget(
         Center(
           child: SizedBox(
@@ -447,7 +380,7 @@ void main() {
 class _Text extends StatelessWidget {
   const _Text(
     this.text, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final String text;

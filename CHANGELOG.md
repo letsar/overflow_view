@@ -1,3 +1,9 @@
+## 0.3.0
+### Changed
+* Add support for null-safety.
+* Increase the minimum version of Flutter.
+* Increase the minimum version of dart sdk.
+
 ## 0.2.2
 ### Fixed
 * [Issue when rendering overflow indicator after having displayed it once.](https://github.com/letsar/overflow_view/issues/3)

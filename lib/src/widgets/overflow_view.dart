@@ -19,13 +19,12 @@ class OverflowView extends MultiChildRenderObjectWidget {
   ///
   /// All children will have the same size has the first child.
   ///
-  /// The [builder], [spacing] and [children] arguments must not be null.
   /// The [spacing] argument must also be positive and finite.
   OverflowView({
-    Key key,
-    @required OverflowIndicatorBuilder builder,
+    Key? key,
+    required OverflowIndicatorBuilder builder,
     Axis direction = Axis.horizontal,
-    @required List<Widget> children,
+    required List<Widget> children,
     double spacing = 0,
   }) : this._all(
           key: key,
@@ -40,13 +39,12 @@ class OverflowView extends MultiChildRenderObjectWidget {
   ///
   /// All children can have their own size.
   ///
-  /// The [builder], [spacing] and [children] arguments must not be null.
   /// The [spacing] argument must also be positive and finite.
   OverflowView.flexible({
-    Key key,
-    @required OverflowIndicatorBuilder builder,
+    Key? key,
+    required OverflowIndicatorBuilder builder,
     Axis direction = Axis.horizontal,
-    @required List<Widget> children,
+    required List<Widget> children,
     double spacing = 0,
   }) : this._all(
           key: key,
@@ -58,17 +56,13 @@ class OverflowView extends MultiChildRenderObjectWidget {
         );
 
   OverflowView._all({
-    Key key,
-    @required OverflowIndicatorBuilder builder,
+    Key? key,
+    required OverflowIndicatorBuilder builder,
     this.direction = Axis.horizontal,
-    @required List<Widget> children,
+    required List<Widget> children,
     this.spacing = 0,
-    OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(builder != null),
-        assert(direction != null),
-        assert(children != null),
-        assert(spacing != null &&
-            spacing > double.negativeInfinity &&
+    required OverflowViewLayoutBehavior layoutBehavior,
+  })  : assert(spacing > double.negativeInfinity &&
             spacing < double.infinity),
         _layoutBehavior = layoutBehavior,
         super(
@@ -126,7 +120,7 @@ class _OverflowViewElement extends MultiChildRenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     children.forEach((element) {
-      if (element.renderObject.isOnstage) {
+      if (element.renderObject?.isOnstage == true) {
         visitor(element);
       }
     });
