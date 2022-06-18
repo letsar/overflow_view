@@ -98,66 +98,115 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               SizedBox(height: 20),
               Expanded(
-                child: OverflowView(
-                  direction: Axis.vertical,
-                  spacing: 4,
-                  children: <Widget>[
-                    for (int i = 0; i < _counter; i++)
-                      AvatarWidget(
-                        text: avatars[i].initials,
-                        color: avatars[i].color,
-                      )
-                  ],
-                  builder: (context, remaining) {
-                    return SizedBox(
-                      height: 80,
-                      width: 80,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          if (remaining > 0)
-                            AvatarOverview(
-                              position: 0,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          if (remaining > 1)
-                            AvatarOverview(
-                              position: 1,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          if (remaining > 2)
-                            AvatarOverview(
-                              position: 2,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          if (remaining > 3)
-                            AvatarOverview(
-                              position: 3,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          Positioned.fill(
-                            child: Center(
-                              child: FractionallySizedBox(
-                                alignment: Alignment.center,
-                                widthFactor: 0.5,
-                                heightFactor: 0.5,
-                                child: FittedBox(
-                                  child: AvatarWidget(
-                                    text: '+$remaining',
-                                    color: Colors.black.withOpacity(0.9),
+                child: Row(
+                  children: [
+                    OverflowView(
+                      direction: Axis.vertical,
+                      spacing: 4,
+                      children: <Widget>[
+                        for (int i = 0; i < _counter; i++)
+                          AvatarWidget(
+                            text: avatars[i].initials,
+                            color: avatars[i].color,
+                          )
+                      ],
+                      builder: (context, remaining) {
+                        return SizedBox(
+                          height: 80,
+                          width: 80,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (remaining > 0)
+                                AvatarOverview(
+                                  position: 0,
+                                  remaining: remaining,
+                                  counter: _counter,
+                                ),
+                              if (remaining > 1)
+                                AvatarOverview(
+                                  position: 1,
+                                  remaining: remaining,
+                                  counter: _counter,
+                                ),
+                              if (remaining > 2)
+                                AvatarOverview(
+                                  position: 2,
+                                  remaining: remaining,
+                                  counter: _counter,
+                                ),
+                              if (remaining > 3)
+                                AvatarOverview(
+                                  position: 3,
+                                  remaining: remaining,
+                                  counter: _counter,
+                                ),
+                              Positioned.fill(
+                                child: Center(
+                                  child: FractionallySizedBox(
+                                    alignment: Alignment.center,
+                                    widthFactor: 0.5,
+                                    heightFactor: 0.5,
+                                    child: FittedBox(
+                                      child: AvatarWidget(
+                                        text: '+$remaining',
+                                        color: Colors.black.withOpacity(0.9),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(width: 40),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "People's names",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(height: 16),
+                          Container(
+                            width: 190,
+                            height: 80,
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              border: Border.all(
+                                color: Colors.blue.shade100,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: OverflowView.wrap(
+                              maxRun: 3,
+                              builder: (context, remainingItemCount) => Chip(
+                                label: Text("+$remainingItemCount"),
+                                backgroundColor: Colors.red,
+                              ),
+                              children: [
+                                for (int i = 0; i < _counter; i++)
+                                  Chip(
+                                    label: Text(
+                                      avatars[i].initials,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    backgroundColor: avatars[i].color,
+                                  ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
+                    )
+                  ],
                 ),
               ),
               // Slider(
@@ -231,7 +280,7 @@ class AvatarOverview extends StatelessWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    Key?  key,
+    Key? key,
     required this.text,
     required this.color,
   }) : super(key: key);
