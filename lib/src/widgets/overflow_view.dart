@@ -98,6 +98,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
           runSpacing: runSpacing,
           crossAxisAlignment: crossAxisAlignment,
           maxRun: maxRun,
+          maxItemPerRun: maxItemPerRun,
           textDirection: textDirection,
           verticalDirection: verticalDirection,
           layoutBehavior: OverflowViewLayoutBehavior.wrap,
