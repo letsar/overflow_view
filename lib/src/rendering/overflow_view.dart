@@ -431,7 +431,14 @@ class RenderOverflowView extends RenderBox
   void performLayout() {
     assert(_debugHasNecessaryDirections);
     _hasVisualOverflow = false;
-    assert(firstChild != null);
+
+    final BoxConstraints constraints = this.constraints;
+
+    if (childCount == 1) {
+      size = constraints.smallest;
+      return;
+    }
+
     resetOffstage();
     switch (layoutBehavior) {
       case OverflowViewLayoutBehavior.fixed:
@@ -455,18 +462,11 @@ class RenderOverflowView extends RenderBox
   }
 
   void performFixedLayout() {
-    final BoxConstraints constraints = this.constraints;
-
-    RenderBox? child = firstChild;
-    if (child == null) {
-      size = constraints.smallest;
-      return;
-    }
-
     final BoxConstraints childConstraints = constraints.loosen();
     final double maxExtent =
         _isHorizontal ? constraints.maxWidth : constraints.maxHeight;
 
+    RenderBox child = firstChild!;
     OverflowViewParentData childParentData =
         child.parentData as OverflowViewParentData;
     child.layout(childConstraints, parentUsesSize: true);
@@ -685,14 +685,6 @@ class RenderOverflowView extends RenderBox
   }
 
   void performWrapLayout() {
-    final BoxConstraints constraints = this.constraints;
-
-    RenderBox? child = firstChild;
-    if (child == null) {
-      size = constraints.smallest;
-      return;
-    }
-
     final BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
     double crossAxisLimit = 0.0;
@@ -735,6 +727,7 @@ class RenderOverflowView extends RenderBox
 
     OverflowViewParentData? previousChildParentData;
 
+    RenderBox? child = firstChild;
     while (child != lastChild) {
       child!.layout(childConstraints, parentUsesSize: true);
 
