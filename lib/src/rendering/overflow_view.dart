@@ -72,13 +72,13 @@ class RenderOverflowView extends RenderBox
     required WrapAlignment runAlignment,
     required double runSpacing,
     required WrapCrossAlignment crossAxisAlignment,
-    required int maxRun,
+    required int? maxRun,
     required int? maxItemPerRun,
     TextDirection? textDirection,
     required VerticalDirection verticalDirection,
     required OverflowViewLayoutBehavior layoutBehavior,
   })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
-        assert(maxRun > 0),
+        assert(maxRun == null || maxRun > 0),
         assert(maxItemPerRun == null || maxItemPerRun > 0),
         _direction = direction,
         _alignment = alignment,
@@ -223,10 +223,10 @@ class RenderOverflowView extends RenderBox
   }
 
   /// A maximum number of rows (the runs).
-  int get maxRun => _maxRun;
-  int _maxRun;
-  set maxRun(int value) {
-    assert(value > 0);
+  int? get maxRun => _maxRun;
+  int? _maxRun;
+  set maxRun(int? value) {
+    assert(value == null || value > 0);
 
     if (_maxRun == value) return;
 
