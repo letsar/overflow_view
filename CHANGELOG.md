@@ -1,3 +1,7 @@
+## 0.4.0
+### Enhancement
+* [Wrapped items](https://github.com/letsar/overflow_view/issues/2)
+
 ## 0.3.1
 ### Changed
 * Small formatting issues.
