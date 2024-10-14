@@ -231,7 +231,7 @@ class AvatarOverview extends StatelessWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    Key?  key,
+    Key? key,
     required this.text,
     required this.color,
   }) : super(key: key);
@@ -315,7 +315,7 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       onPressed: () {},
       child: Row(
         children: [

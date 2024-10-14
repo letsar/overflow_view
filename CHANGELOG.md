@@ -1,3 +1,8 @@
+## 0.4.0
+### Changed
+* Update Flutter and Dart SDK constraints.
+* Update dependencies.
+
 ## 0.3.1
 ### Changed
 * Small formatting issues.
