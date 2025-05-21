@@ -1,16 +1,16 @@
 name: overflow_view
 description: A widget displaying children in a line with an overflow indicator at the end if there is not enough space.
-version: 0.4.0
+version: 0.5.0
 homepage: https://github.com/letsar/overflow_view
 
 environment:
   sdk: ">=2.17.0 <4.0.0"
-  flutter: ">=3.0.0"
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  value_layout_builder: ^0.4.0
+  value_layout_builder: ^0.5.0
 
 dev_dependencies:
   flutter_test:
