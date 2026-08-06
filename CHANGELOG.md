@@ -1,3 +1,7 @@
+## 0.5.1
+### Fixed
+* [Hit test always returns false.](https://github.com/letsar/overflow_view/issues/10)
+
 ## 0.5.0
 ### Changed
 * Update Flutter constraints.

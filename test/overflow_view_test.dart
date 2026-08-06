@@ -375,6 +375,216 @@ void main() {
       );
     },
   );
+
+  group('hit test', () {
+    testWidgets(
+      'a tap on a child is dispatched to an enclosing GestureDetector',
+      (tester) async {
+        int tapCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            onTap: () => tapCount++,
+            child: OverflowView(
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('A'));
+        expect(tapCount, 1);
+
+        await tester.tap(find.text('B'));
+        expect(tapCount, 2);
+      },
+    );
+
+    testWidgets(
+      'a tap on a child of OverflowView.flexible is dispatched to an enclosing '
+      'GestureDetector',
+      (tester) async {
+        int tapCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            onTap: () => tapCount++,
+            child: OverflowView.flexible(
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('A'));
+        expect(tapCount, 1);
+      },
+    );
+
+    testWidgets(
+      'a tap on the overflow indicator is dispatched to it',
+      (tester) async {
+        int tapCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            child: OverflowView(
+              builder: (context, count) {
+                return GestureDetector(
+                  onTap: () => tapCount++,
+                  child: const _Text('+'),
+                );
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('+'));
+        expect(tapCount, 1);
+      },
+    );
+
+    testWidgets(
+      'a tap on an area without any onstage child is not dispatched to an '
+      'enclosing GestureDetector',
+      (tester) async {
+        int tapCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 110,
+            height: 110,
+            onTap: () => tapCount++,
+            child: OverflowView(
+              spacing: 10,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+              ],
+            ),
+          ),
+        );
+
+        // The children are 50x50. 'A' is at (0, 0) and 'B' is at (60, 0). The
+        // OverflowView itself is 110x110, so these two points are inside it,
+        // but outside of any child.
+        await tester.tapAt(const Offset(55, 25));
+        expect(tapCount, 0);
+
+        await tester.tapAt(const Offset(25, 80));
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'a tap on overlapping children is dispatched to the topmost one',
+      (tester) async {
+        final List<String> tappedChildren = <String>[];
+        Widget buildChild(String text) {
+          return GestureDetector(
+            onTap: () => tappedChildren.add(text),
+            child: _Text(text),
+          );
+        }
+
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 110,
+            height: 110,
+            child: OverflowView(
+              spacing: -10,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                buildChild('A'),
+                buildChild('B'),
+              ],
+            ),
+          ),
+        );
+
+        // The children are 50x50. 'A' is at (0, 0) and 'B' is at (40, 0), so
+        // they overlap between x = 40 and x = 50. 'B' is painted after 'A', so
+        // it is on top.
+        await tester.tapAt(const Offset(45, 25));
+        expect(tappedChildren, ['B']);
+      },
+    );
+
+    testWidgets(
+      'a tap on an offstage child is not dispatched to it',
+      (tester) async {
+        int tapCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            child: OverflowView(
+              builder: (context, count) {
+                return const _Text('+');
+              },
+              children: [
+                const _Text('A'),
+                GestureDetector(
+                  onTap: () => tapCount++,
+                  child: const _Text('B'),
+                ),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        // 'B' is offstage, so it is painted at the bottom right corner of the
+        // OverflowView. A tap there must not reach it.
+        await tester.tapAt(const Offset(99, 99));
+        expect(tapCount, 0);
+      },
+    );
+  });
+}
+
+Widget _boilerplate({
+  required double width,
+  required double height,
+  required Widget child,
+  VoidCallback? onTap,
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Align(
+      alignment: Alignment.topLeft,
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: child,
+        ),
+      ),
+    ),
+  );
 }
 
 class _Text extends StatelessWidget {

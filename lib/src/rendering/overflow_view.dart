@@ -374,20 +374,29 @@ class RenderOverflowView extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    // The x, y parameters have the top left of the node's box as the origin.
-    visitOnlyOnStageChildren((renderObject) {
-      final RenderBox child = renderObject as RenderBox;
+    // The position parameter has the top left of the node's box as the origin.
+    // We visit the onstage children in reverse paint order, so that the topmost
+    // one wins, and we stop at the first child which is hit.
+    RenderBox? child = lastChild;
+    while (child != null) {
+      final RenderBox currentChild = child;
       final OverflowViewParentData childParentData =
-          child.parentData as OverflowViewParentData;
-      result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          return child.hitTest(result, position: transformed);
-        },
-      );
-    });
+          currentChild.parentData as OverflowViewParentData;
+      if (childParentData.offstage == false) {
+        final bool isHit = result.addWithPaintOffset(
+          offset: childParentData.offset,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(transformed == position - childParentData.offset);
+            return currentChild.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit) {
+          return true;
+        }
+      }
+      child = childParentData.previousSibling;
+    }
 
     return false;
   }
