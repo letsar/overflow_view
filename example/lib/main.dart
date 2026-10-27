@@ -199,7 +199,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: FittedBox(
                                     child: AvatarWidget(
                                       text: '+$remaining',
-                                      color: Colors.black.withOpacity(0.9),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.9),
                                     ),
                                   ),
                                 ),

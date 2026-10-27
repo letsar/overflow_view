@@ -33,17 +33,19 @@ class OverflowView extends MultiChildRenderObjectWidget {
     double spacing = 0,
     double runSpacing = 0,
     int maxRuns = 1,
+    int? maxCount = null,
   }) : this._all(
-          key: key,
-          builder: builder,
-          direction: direction,
-          textDirection: textDirection,
-          children: children,
-          spacing: spacing,
-          runSpacing: runSpacing,
-          maxRuns: maxRuns,
-          layoutBehavior: OverflowViewLayoutBehavior.fixed,
-        );
+         key: key,
+         builder: builder,
+         direction: direction,
+         textDirection: textDirection,
+         children: children,
+         spacing: spacing,
+         runSpacing: runSpacing,
+         maxRuns: maxRuns,
+         layoutBehavior: OverflowViewLayoutBehavior.fixed,
+         maxCount: maxCount,
+       );
 
   /// Creates a flexible [OverflowView].
   ///
@@ -59,17 +61,19 @@ class OverflowView extends MultiChildRenderObjectWidget {
     double spacing = 0,
     double runSpacing = 0,
     int maxRuns = 1,
+    int? maxCount = null,
   }) : this._all(
-          key: key,
-          builder: builder,
-          direction: direction,
-          textDirection: textDirection,
-          children: children,
-          spacing: spacing,
-          runSpacing: runSpacing,
-          maxRuns: maxRuns,
-          layoutBehavior: OverflowViewLayoutBehavior.flexible,
-        );
+         key: key,
+         builder: builder,
+         direction: direction,
+         textDirection: textDirection,
+         children: children,
+         spacing: spacing,
+         runSpacing: runSpacing,
+         maxRuns: maxRuns,
+         layoutBehavior: OverflowViewLayoutBehavior.flexible,
+         maxCount: maxCount,
+       );
 
   OverflowView._all({
     Key? key,
@@ -80,23 +84,26 @@ class OverflowView extends MultiChildRenderObjectWidget {
     this.spacing = 0,
     this.runSpacing = 0,
     this.maxRuns = 1,
+    this.maxCount = null,
     required OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
-        assert(runSpacing > double.negativeInfinity &&
-            runSpacing < double.infinity),
-        assert(maxRuns >= 1),
-        _layoutBehavior = layoutBehavior,
-        super(
-          key: key,
-          children: [
-            ...children,
-            ValueLayoutBuilder<int>(
-              builder: (context, constraints) {
-                return builder(context, constraints.value);
-              },
-            ),
-          ],
-        );
+  }) : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+       assert(
+         runSpacing > double.negativeInfinity && runSpacing < double.infinity,
+       ),
+       assert(maxRuns >= 1),
+       assert(maxCount == null || maxCount >= 0),
+       _layoutBehavior = layoutBehavior,
+       super(
+         key: key,
+         children: [
+           ...children,
+           ValueLayoutBuilder<int>(
+             builder: (context, constraints) {
+               return builder(context, constraints.value);
+             },
+           ),
+         ],
+       );
 
   /// The direction to use as the main axis.
   ///
@@ -127,6 +134,11 @@ class OverflowView extends MultiChildRenderObjectWidget {
   /// Defaults to 1, which displays the children in a single line.
   final int maxRuns;
 
+  /// Maximum number of items to display before overflowing, even if space
+  /// remains for more. If `null`, only the available space will influence
+  /// the maximum number of children to display.
+  final int? maxCount;
+
   final OverflowViewLayoutBehavior _layoutBehavior;
 
   TextDirection _getTextDirection(BuildContext context) {
@@ -149,6 +161,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
       runSpacing: runSpacing,
       maxRuns: maxRuns,
       layoutBehavior: _layoutBehavior,
+      maxCount: maxCount,
     );
   }
 
@@ -163,6 +176,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
       ..spacing = spacing
       ..runSpacing = runSpacing
       ..maxRuns = maxRuns
+      ..maxCount = maxCount
       ..layoutBehavior = _layoutBehavior;
   }
 }

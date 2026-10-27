@@ -1,18 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:value_layout_builder/value_layout_builder.dart';
-
-import 'dart:math' as math;
 
 /// Parent data for use with [RenderOverflowView].
 class OverflowViewParentData extends ContainerBoxParentData<RenderBox> {
   bool? offstage;
 }
 
-enum OverflowViewLayoutBehavior {
-  fixed,
-  flexible,
-}
+enum OverflowViewLayoutBehavior { fixed, flexible }
 
 class RenderOverflowView extends RenderBox
     with
@@ -26,17 +23,21 @@ class RenderOverflowView extends RenderBox
     required double runSpacing,
     required int maxRuns,
     required OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
-        assert(runSpacing > double.negativeInfinity &&
-            runSpacing < double.infinity),
-        assert(maxRuns >= 1),
-        _direction = direction,
-        _textDirection = textDirection,
-        _spacing = spacing,
-        _runSpacing = runSpacing,
-        _maxRuns = maxRuns,
-        _layoutBehavior = layoutBehavior,
-        _isHorizontal = direction == Axis.horizontal {
+    required int? maxCount,
+  }) : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+       assert(
+         runSpacing > double.negativeInfinity && runSpacing < double.infinity,
+       ),
+       assert(maxRuns >= 1),
+       assert(maxCount == null || maxCount >= 0),
+       _direction = direction,
+       _textDirection = textDirection,
+       _spacing = spacing,
+       _runSpacing = runSpacing,
+       _maxRuns = maxRuns,
+       _layoutBehavior = layoutBehavior,
+       _maxCount = maxCount,
+       _isHorizontal = direction == Axis.horizontal {
     addAll(children);
   }
 
@@ -98,6 +99,15 @@ class RenderOverflowView extends RenderBox
     }
   }
 
+  int? get maxCount => _maxCount;
+  int? _maxCount;
+  set maxCount(int? value) {
+    if (_maxCount != value) {
+      _maxCount = value;
+      markNeedsLayout();
+    }
+  }
+
   bool _isHorizontal;
   @override
   void setupParentData(RenderBox child) {
@@ -130,8 +140,9 @@ class RenderOverflowView extends RenderBox
     resetOffstage();
 
     final bool isFixed = layoutBehavior == OverflowViewLayoutBehavior.fixed;
-    final double maxCrossExtent =
-        _isHorizontal ? constraints.maxHeight : constraints.maxWidth;
+    final double maxCrossExtent = _isHorizontal
+        ? constraints.maxHeight
+        : constraints.maxWidth;
     final _Runs runs = _Runs(
       maxExtent: _isHorizontal ? constraints.maxWidth : constraints.maxHeight,
       spacing: spacing,
@@ -148,8 +159,8 @@ class RenderOverflowView extends RenderBox
     BoxConstraints childConstraints = isFixed
         ? constraints.loosen()
         : _isHorizontal
-            ? BoxConstraints(maxHeight: maxCrossExtent)
-            : BoxConstraints(maxWidth: maxCrossExtent);
+        ? BoxConstraints(maxHeight: maxCrossExtent)
+        : BoxConstraints(maxWidth: maxCrossExtent);
     double? fixedExtent;
 
     RenderBox child = firstChild!;
@@ -185,7 +196,8 @@ class RenderOverflowView extends RenderBox
     if (unRenderedChildCount > 0) {
       while (true) {
         final int indicatorCount = unRenderedChildCount;
-        final double indicatorExtent = fixedExtent ??
+        final double indicatorExtent =
+            fixedExtent ??
             _layoutOverflowIndicator(indicatorCount, childConstraints);
 
         // We hide the last children until there is room for the indicator.
@@ -222,10 +234,9 @@ class RenderOverflowView extends RenderBox
       // When its last constraints were tight (fixed mode), the
       // overflowIndicator is a relayout boundary, so markNeedsLayout doesn't
       // reach us and we don't need to build it with no remaining children.
-      overflowIndicator.layout(BoxValueConstraints<int>(
-        value: 0,
-        constraints: childConstraints,
-      ));
+      overflowIndicator.layout(
+        BoxValueConstraints<int>(value: 0, constraints: childConstraints),
+      );
     }
 
     // By default we center all children in the cross-axis of their run.
@@ -238,8 +249,10 @@ class RenderOverflowView extends RenderBox
       final int runEnd = runStart + runChildCount;
       double runCrossExtent = 0;
       for (int i = runStart; i < runEnd; i++) {
-        runCrossExtent =
-            math.max(runCrossExtent, _getCrossSize(onstageChildren[i]));
+        runCrossExtent = math.max(
+          runCrossExtent,
+          _getCrossSize(onstageChildren[i]),
+        );
       }
       for (int i = runStart; i < runEnd; i++) {
         final RenderBox child = onstageChildren[i];
@@ -249,8 +262,9 @@ class RenderOverflowView extends RenderBox
           _getMainOffset(child),
           crossOffset + (runCrossExtent - _getCrossSize(child)) / 2.0,
         );
-        contentBounds =
-            contentBounds.expandToInclude(childParentData.offset & child.size);
+        contentBounds = contentBounds.expandToInclude(
+          childParentData.offset & child.size,
+        );
       }
       crossOffset += runCrossExtent + runSpacing;
       runStart = runEnd;
@@ -261,7 +275,8 @@ class RenderOverflowView extends RenderBox
       _getSize(runs.extent, crossOffset - runSpacing),
     );
     const double tolerance = precisionErrorTolerance;
-    _hasOverflow = contentBounds.left < -tolerance ||
+    _hasOverflow =
+        contentBounds.left < -tolerance ||
         contentBounds.top < -tolerance ||
         contentBounds.right > size.width + tolerance ||
         contentBounds.bottom > size.height + tolerance;
