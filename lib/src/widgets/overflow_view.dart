@@ -26,6 +26,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Axis direction = Axis.horizontal,
     required List<Widget> children,
     double spacing = 0,
+    int? maxCount = null,
   }) : this._all(
           key: key,
           builder: builder,
@@ -33,6 +34,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
           children: children,
           spacing: spacing,
           layoutBehavior: OverflowViewLayoutBehavior.fixed,
+          maxCount: maxCount,
         );
 
   /// Creates a flexible [OverflowView].
@@ -46,6 +48,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Axis direction = Axis.horizontal,
     required List<Widget> children,
     double spacing = 0,
+    int? maxCount = null,
   }) : this._all(
           key: key,
           builder: builder,
@@ -53,6 +56,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
           children: children,
           spacing: spacing,
           layoutBehavior: OverflowViewLayoutBehavior.flexible,
+          maxCount: maxCount,
         );
 
   OverflowView._all({
@@ -62,8 +66,9 @@ class OverflowView extends MultiChildRenderObjectWidget {
     required List<Widget> children,
     this.spacing = 0,
     required OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(spacing > double.negativeInfinity &&
-            spacing < double.infinity),
+    this.maxCount = null,
+  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+        assert(maxCount == null || maxCount >= 0),
         _layoutBehavior = layoutBehavior,
         super(
           key: key,
@@ -86,6 +91,11 @@ class OverflowView extends MultiChildRenderObjectWidget {
   /// The amount of space between successive children.
   final double spacing;
 
+  /// Maximum number of items to display before overflowing, even if space
+  /// remains for more. If `null`, only the available space will influence
+  /// the maximum number of children to display.
+  final int? maxCount;
+
   final OverflowViewLayoutBehavior _layoutBehavior;
 
   @override
@@ -99,6 +109,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
       direction: direction,
       spacing: spacing,
       layoutBehavior: _layoutBehavior,
+      maxCount: maxCount,
     );
   }
 
@@ -110,7 +121,8 @@ class OverflowView extends MultiChildRenderObjectWidget {
     renderObject
       ..direction = direction
       ..spacing = spacing
-      ..layoutBehavior = _layoutBehavior;
+      ..layoutBehavior = _layoutBehavior
+      ..maxCount = maxCount;
   }
 }
 
