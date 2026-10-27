@@ -22,10 +22,13 @@ class RenderOverflowView extends RenderBox
     required Axis direction,
     required double spacing,
     required OverflowViewLayoutBehavior layoutBehavior,
+    required int? maxCount,
   })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+        assert(maxCount == null || maxCount >= 0),
         _direction = direction,
         _spacing = spacing,
         _layoutBehavior = layoutBehavior,
+        _maxCount = maxCount,
         _isHorizontal = direction == Axis.horizontal {
     addAll(children);
   }
@@ -55,6 +58,15 @@ class RenderOverflowView extends RenderBox
   set layoutBehavior(OverflowViewLayoutBehavior value) {
     if (_layoutBehavior != value) {
       _layoutBehavior = value;
+      markNeedsLayout();
+    }
+  }
+
+  int? get maxCount => _maxCount;
+  int? _maxCount;
+  set maxCount(int? value) {
+    if (_maxCount != value) {
+      _maxCount = value;
       markNeedsLayout();
     }
   }
@@ -134,12 +146,26 @@ class RenderOverflowView extends RenderBox
 
     int onstageCount = 0;
     final int count = childCount - 1;
+    final int? maxCount = _maxCount;
+    final int cap = maxCount == null ? count : math.min(maxCount, count);
+
     final double requestedExtent =
         childExtent * (childCount - 1) + spacing * (childCount - 2);
-    final int renderedChildCount = requestedExtent <= maxExtent
-        ? count
-        : (maxExtent + spacing) ~/ childStride - 1;
+
+    final bool allFit = cap >= count && requestedExtent <= maxExtent;
+    final int spaceLimited =
+        maxExtent.isFinite ? (maxExtent + spacing) ~/ childStride - 1 : count;
+
+    debugPrint(
+        'childStride: $childStride, maxExtent: $maxExtent, spacing: $spacing, spaceLimited: $spaceLimited');
+
+    final int renderedChildCount =
+        allFit ? count : math.max(0, math.min(spaceLimited, cap));
     final int unRenderedChildCount = count - renderedChildCount;
+
+    debugPrint(
+        'renderedChildCount: $renderedChildCount, unRenderedChildCount: $unRenderedChildCount');
+
     if (renderedChildCount > 0) {
       childParentData.offstage = false;
       onstageCount++;
@@ -199,8 +225,15 @@ class RenderOverflowView extends RenderBox
         ? BoxConstraints.loose(Size(double.infinity, maxCrossExtent))
         : BoxConstraints.loose(Size(maxCrossExtent, double.infinity));
 
+    final int? maxCount = _maxCount;
     bool showOverflowIndicator = false;
     while (child != lastChild) {
+      if (maxCount != null && childCount - unRenderedChildCount > maxCount) {
+        // Hit max count, so we cannot render any further child.
+        showOverflowIndicator = true;
+        break;
+      }
+
       final OverflowViewParentData childParentData =
           child.parentData as OverflowViewParentData;
 

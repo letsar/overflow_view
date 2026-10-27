@@ -75,8 +75,26 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(fontSize: 20),
               ),
               SizedBox(height: 20),
-              OverflowView.flexible(
+              OverflowView(
                 spacing: -40,
+                children: <Widget>[
+                  for (int i = 0; i < _counter; i++)
+                    AvatarWidget(
+                      text: avatars[i].initials,
+                      color: avatars[i].color,
+                    )
+                ],
+                builder: (context, remaining) {
+                  return AvatarWidget(
+                    text: '+$remaining',
+                    color: Colors.red,
+                  );
+                },
+              ),
+              SizedBox(height: 20),
+              OverflowView(
+                spacing: -40,
+                maxCount: 5,
                 children: <Widget>[
                   for (int i = 0; i < _counter; i++)
                     AvatarWidget(
