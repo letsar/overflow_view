@@ -904,8 +904,7 @@ void main() {
                 return const SizedBox();
               },
               children: [
-                for (int i = 0; i < childCount; i++)
-                  const SizedBox(width: 50),
+                for (int i = 0; i < childCount; i++) const SizedBox(width: 50),
               ],
             ),
           ),
@@ -917,6 +916,83 @@ void main() {
       await tester.pumpWidget(const SizedBox());
 
       expect(counts, isNot(contains(0)));
+    },
+  );
+
+  testWidgets(
+    'children are clipped only when they paint outside of the OverflowView',
+    (tester) async {
+      Future<RenderObject> pump({
+        double spacing = 0,
+        double runSpacing = 0,
+        int maxRuns = 1,
+      }) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 200,
+            height: 200,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: OverflowView.flexible(
+                spacing: spacing,
+                runSpacing: runSpacing,
+                maxRuns: maxRuns,
+                builder: (context, count) {
+                  return const SizedBox();
+                },
+                children: [
+                  const _Text('A', width: 150),
+                  const _Text('B', width: 100),
+                ],
+              ),
+            ),
+          ),
+        );
+        return tester.renderObject(find.byType(OverflowView));
+      }
+
+      expect(await pump(spacing: 10, maxRuns: 2), isNot(paints..clipRect()));
+
+      // 'B' ends at 150 - 145 + 100 = 105, so the OverflowView is 105 wide,
+      // but 'A' is 150 wide.
+      expect(await pump(spacing: -145), paints..clipRect());
+
+      // 'B' is in a second run which starts at 50 - 60 = -10.
+      expect(
+        await pump(runSpacing: -60, maxRuns: 2),
+        paints..clipRect(),
+      );
+    },
+  );
+
+  testWidgets(
+    'switching between OverflowView.flexible and OverflowView works',
+    (tester) async {
+      Widget build({required bool flexible, required int childCount}) {
+        final List<Widget> children = [
+          for (int i = 0; i < childCount; i++) const SizedBox(width: 50),
+        ];
+        // The indicator is updated when switching, so it needs a new layout.
+        Widget builder(BuildContext context, int count) {
+          return SizedBox(width: flexible ? 50 : 51);
+        }
+
+        return Center(
+          child: SizedBox(
+            width: 100,
+            child: flexible
+                ? OverflowView.flexible(builder: builder, children: children)
+                : OverflowView(builder: builder, children: children),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(flexible: true, childCount: 3));
+      await tester.pumpWidget(build(flexible: false, childCount: 2));
+      await tester.pumpWidget(build(flexible: false, childCount: 2));
+      await tester.pumpWidget(const SizedBox());
+
+      expect(tester.takeException(), isNull);
     },
   );
 

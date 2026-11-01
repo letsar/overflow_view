@@ -3,12 +3,13 @@
 * [Wrapped items](https://github.com/letsar/overflow_view/issues/2): `maxRuns` and `runSpacing` display the children in several runs, with the overflow indicator at the end of the last one.
 
 ### Changed
-* `OverflowView.flexible` no longer builds the overflow indicator when all the children fit.
-* `OverflowView.flexible` only clips its children when they overflow.
+* `OverflowView.flexible` no longer builds the overflow indicator when all the children fit, unless it has already been displayed.
+* `OverflowView.flexible` only clips its children when they paint outside of it.
 
 ### Fixed
 * `OverflowView.flexible` positions the overflow indicator with its final size when it changes with the number of hidden children.
 * Children which exactly fill the available space are no longer hidden because of rounding errors.
+* Switching from `OverflowView.flexible` to `OverflowView` no longer throws assertion errors when the overflow indicator is updated.
 
 ## 0.5.1
 ### Fixed

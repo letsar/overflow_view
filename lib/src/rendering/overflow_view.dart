@@ -202,13 +202,15 @@ class RenderOverflowView extends RenderBox
         // different.
         runs.removeLast(mainOffset);
       }
-    } else if (!isFixed && overflowIndicator.hasSize) {
+    } else if (overflowIndicator.hasSize &&
+        !overflowIndicator.constraints.isTight) {
       // We need to layout the overflowIndicator because we may have already
       // laid it out with parentUsesSize: true before.
       // When unmounting a _LayoutBuilderElement, it calls markNeedsLayout
       // a last time, and can cause error.
-      // In fixed mode, the overflowIndicator has tight constraints, so it's a
-      // relayout boundary and markNeedsLayout doesn't reach us.
+      // When its last constraints were tight (fixed mode), the
+      // overflowIndicator is a relayout boundary, so markNeedsLayout doesn't
+      // reach us and we don't need to build it with no remaining children.
       overflowIndicator.layout(BoxValueConstraints<int>(
         value: 0,
         constraints: childConstraints,
@@ -216,6 +218,9 @@ class RenderOverflowView extends RenderBox
     }
 
     // By default we center all children in the cross-axis of their run.
+    // We also compute the bounds of the children, because with negative
+    // spacings, they can paint outside of the runs.
+    Rect contentBounds = Rect.zero;
     double crossOffset = 0;
     int runStart = 0;
     for (final int runChildCount in runs.childCounts) {
@@ -233,16 +238,22 @@ class RenderOverflowView extends RenderBox
           _getMainOffset(child),
           crossOffset + (runCrossExtent - _getCrossSize(child)) / 2.0,
         );
+        contentBounds =
+            contentBounds.expandToInclude(childParentData.offset & child.size);
       }
       crossOffset += runCrossExtent + runSpacing;
       runStart = runEnd;
     }
     assert(runStart == onstageChildren.length);
 
-    final Size idealSize = _getSize(runs.extent, crossOffset - runSpacing);
-    size = constraints.constrain(idealSize);
-    _hasOverflow = idealSize.width - size.width > precisionErrorTolerance ||
-        idealSize.height - size.height > precisionErrorTolerance;
+    size = constraints.constrain(
+      _getSize(runs.extent, crossOffset - runSpacing),
+    );
+    const double tolerance = precisionErrorTolerance;
+    _hasOverflow = contentBounds.left < -tolerance ||
+        contentBounds.top < -tolerance ||
+        contentBounds.right > size.width + tolerance ||
+        contentBounds.bottom > size.height + tolerance;
   }
 
   void resetOffstage() {
