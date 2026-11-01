@@ -1,4 +1,4 @@
-## Unreleased
+## 0.6.0
 ### Added
 * [Wrapped items](https://github.com/letsar/overflow_view/issues/2): `maxRuns` and `runSpacing` display the children in several runs, with the overflow indicator at the end of the last one.
 
