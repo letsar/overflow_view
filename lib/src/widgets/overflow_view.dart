@@ -13,6 +13,10 @@ typedef OverflowIndicatorBuilder = Widget Function(
 /// is no more room. If all the children don't fit in the available space, it
 /// displays an indicator at the end.
 ///
+/// The children can also be displayed in several runs, like in a [Wrap], by
+/// setting `maxRuns`. In that case, the indicator is at the end of the last
+/// run.
+///
 /// All chidren will have the same size as the first child.
 class OverflowView extends MultiChildRenderObjectWidget {
   /// Creates an [OverflowView].
@@ -26,12 +30,16 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Axis direction = Axis.horizontal,
     required List<Widget> children,
     double spacing = 0,
+    double runSpacing = 0,
+    int maxRuns = 1,
   }) : this._all(
           key: key,
           builder: builder,
           direction: direction,
           children: children,
           spacing: spacing,
+          runSpacing: runSpacing,
+          maxRuns: maxRuns,
           layoutBehavior: OverflowViewLayoutBehavior.fixed,
         );
 
@@ -46,12 +54,16 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Axis direction = Axis.horizontal,
     required List<Widget> children,
     double spacing = 0,
+    double runSpacing = 0,
+    int maxRuns = 1,
   }) : this._all(
           key: key,
           builder: builder,
           direction: direction,
           children: children,
           spacing: spacing,
+          runSpacing: runSpacing,
+          maxRuns: maxRuns,
           layoutBehavior: OverflowViewLayoutBehavior.flexible,
         );
 
@@ -61,9 +73,13 @@ class OverflowView extends MultiChildRenderObjectWidget {
     this.direction = Axis.horizontal,
     required List<Widget> children,
     this.spacing = 0,
+    this.runSpacing = 0,
+    this.maxRuns = 1,
     required OverflowViewLayoutBehavior layoutBehavior,
-  })  : assert(spacing > double.negativeInfinity &&
-            spacing < double.infinity),
+  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+        assert(runSpacing > double.negativeInfinity &&
+            runSpacing < double.infinity),
+        assert(maxRuns >= 1),
         _layoutBehavior = layoutBehavior,
         super(
           key: key,
@@ -83,8 +99,20 @@ class OverflowView extends MultiChildRenderObjectWidget {
   /// children are placed adjacent to one another as in a [Row].
   final Axis direction;
 
-  /// The amount of space between successive children.
+  /// The amount of space between successive children in a run.
   final double spacing;
+
+  /// The amount of space between successive runs.
+  final double runSpacing;
+
+  /// The maximum number of runs.
+  ///
+  /// When a child doesn't fit at the end of a run, it starts a new run, until
+  /// there are [maxRuns] runs. For example, if [direction] is
+  /// [Axis.horizontal], a run is a row.
+  ///
+  /// Defaults to 1, which displays the children in a single line.
+  final int maxRuns;
 
   final OverflowViewLayoutBehavior _layoutBehavior;
 
@@ -98,6 +126,8 @@ class OverflowView extends MultiChildRenderObjectWidget {
     return RenderOverflowView(
       direction: direction,
       spacing: spacing,
+      runSpacing: runSpacing,
+      maxRuns: maxRuns,
       layoutBehavior: _layoutBehavior,
     );
   }
@@ -110,6 +140,8 @@ class OverflowView extends MultiChildRenderObjectWidget {
     renderObject
       ..direction = direction
       ..spacing = spacing
+      ..runSpacing = runSpacing
+      ..maxRuns = maxRuns
       ..layoutBehavior = _layoutBehavior;
   }
 }

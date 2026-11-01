@@ -46,11 +46,19 @@ const List<Avatar> avatars = <Avatar>[
   Avatar('AA', Colors.blueAccent),
   Avatar('BA', Colors.tealAccent),
   Avatar('CR', Colors.yellow),
+  Avatar('LM', Colors.orange),
+  Avatar('PT', Colors.indigo),
+  Avatar('SG', Colors.cyan),
+  Avatar('EV', Colors.brown),
+  Avatar('NB', Colors.lime),
 ];
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 1;
   double ratio = 1;
+  int maxRuns = 1;
+  double spacing = -40;
+  double runSpacing = 4;
 
   void _incrementCounter() {
     setState(() {
@@ -74,9 +82,38 @@ class _MyHomePageState extends State<MyHomePage> {
                 'People',
                 style: TextStyle(fontSize: 20),
               ),
-              SizedBox(height: 20),
+              _SliderRow(
+                label: 'Runs: $maxRuns',
+                value: maxRuns.toDouble(),
+                min: 1,
+                max: 3,
+                onChanged: (value) => setState(() {
+                  maxRuns = value.round();
+                }),
+              ),
+              _SliderRow(
+                label: 'Spacing: ${spacing.round()}',
+                value: spacing,
+                min: -40,
+                max: 20,
+                onChanged: (value) => setState(() {
+                  spacing = value;
+                }),
+              ),
+              _SliderRow(
+                label: 'Run spacing: ${runSpacing.round()}',
+                value: runSpacing,
+                min: -40,
+                max: 20,
+                onChanged: (value) => setState(() {
+                  runSpacing = value;
+                }),
+              ),
+              SizedBox(height: 12),
               OverflowView.flexible(
-                spacing: -40,
+                maxRuns: maxRuns,
+                spacing: spacing,
+                runSpacing: runSpacing,
                 children: <Widget>[
                   for (int i = 0; i < _counter; i++)
                     AvatarWidget(
@@ -181,6 +218,41 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),
+    );
+  }
+}
+
+class _SliderRow extends StatelessWidget {
+  const _SliderRow({
+    Key? key,
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+  }) : super(key: key);
+
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: 120, child: Text(label)),
+        Expanded(
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: (max - min).round(),
+            onChanged: onChanged,
+          ),
+        ),
+      ],
     );
   }
 }
