@@ -4,9 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:overflow_view/overflow_view.dart';
 
 void main() {
-
   testWidgets(
-    'the overflow indicator is not built if there is enough room (except for flexible)',
+    'the overflow indicator is not built if there is enough room',
     (tester) async {
       int buildCount = 0;
       await tester.pumpWidget(
@@ -39,7 +38,7 @@ void main() {
           ),
         ),
       );
-      expect(buildCount, 1);
+      expect(buildCount, 0);
     },
   );
 
@@ -563,6 +562,416 @@ void main() {
       },
     );
   });
+
+  group('runs', () {
+    testWidgets(
+      'children are laid out in several runs when maxRuns is greater than 1',
+      (tester) async {
+        int buildCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: OverflowView(
+                maxRuns: 2,
+                builder: (context, count) {
+                  buildCount++;
+                  return const SizedBox();
+                },
+                children: [
+                  const _Text('A'),
+                  const _Text('B'),
+                  const _Text('C'),
+                  const _Text('D'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(buildCount, 0);
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(50, 0));
+        expect(tester.getTopLeft(find.text('C')), const Offset(0, 50));
+        expect(tester.getTopLeft(find.text('D')), const Offset(50, 50));
+        expect(tester.getSize(find.byType(OverflowView)), const Size(100, 100));
+      },
+    );
+
+    testWidgets(
+      'the overflow indicator is at the end of the last run',
+      (tester) async {
+        int buildCount = 0;
+        late int remainingCount;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: OverflowView(
+              maxRuns: 2,
+              builder: (context, count) {
+                buildCount++;
+                remainingCount = count;
+                return const _Text('+');
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+                const _Text('D'),
+                const _Text('E'),
+              ],
+            ),
+          ),
+        );
+
+        expect(buildCount, 1);
+        expect(remainingCount, 2);
+        expect(find.text('D'), findsNothing);
+        expect(find.text('E'), findsNothing);
+        expect(tester.getTopLeft(find.text('C')), const Offset(0, 50));
+        expect(tester.getTopLeft(find.text('+')), const Offset(50, 50));
+      },
+    );
+
+    testWidgets(
+      'runs are separated by runSpacing and children by spacing',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: OverflowView.flexible(
+                maxRuns: 2,
+                spacing: 10,
+                runSpacing: 5,
+                builder: (context, count) {
+                  return const SizedBox();
+                },
+                children: [
+                  const _Text('A', width: 40),
+                  const _Text('B', width: 40),
+                  const _Text('C', width: 40),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // 'C' would end at 40 + 10 + 40 + 10 + 40 = 140, so it starts a new
+        // run.
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(50, 0));
+        expect(tester.getTopLeft(find.text('C')), const Offset(0, 55));
+        expect(tester.getSize(find.byType(OverflowView)), const Size(90, 105));
+      },
+    );
+
+    testWidgets(
+      'children are centered in the cross axis of their run',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: OverflowView.flexible(
+              maxRuns: 2,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A', height: 20),
+                const _Text('B', height: 40),
+                const _Text('C', height: 10),
+                const _Text('D', height: 30),
+              ],
+            ),
+          ),
+        );
+
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 10));
+        expect(tester.getTopLeft(find.text('B')), const Offset(50, 0));
+        expect(tester.getTopLeft(find.text('C')), const Offset(0, 50));
+        expect(tester.getTopLeft(find.text('D')), const Offset(50, 40));
+      },
+    );
+
+    testWidgets(
+      'the overflow indicator uses the free space at the end of the last run',
+      (tester) async {
+        late int remainingCount;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: OverflowView.flexible(
+              maxRuns: 2,
+              builder: (context, count) {
+                remainingCount = count;
+                return const _Text('+', width: 10);
+              },
+              children: [
+                for (final String text in ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+                  _Text(text, width: 30),
+              ],
+            ),
+          ),
+        );
+
+        expect(remainingCount, 1);
+        expect(find.text('F'), findsOneWidget);
+        expect(tester.getTopLeft(find.text('+')), const Offset(90, 50));
+      },
+    );
+
+    testWidgets(
+      'only the children of the last run are hidden to make room for the '
+      'overflow indicator',
+      (tester) async {
+        late int remainingCount;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: OverflowView.flexible(
+              maxRuns: 2,
+              builder: (context, count) {
+                remainingCount = count;
+                return const _Text('+', width: 50);
+              },
+              children: [
+                for (final String text in ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+                  _Text(text, width: 30),
+              ],
+            ),
+          ),
+        );
+
+        expect(remainingCount, 3);
+        expect(find.text('C'), findsOneWidget);
+        expect(find.text('D'), findsOneWidget);
+        expect(find.text('E'), findsNothing);
+        expect(tester.getTopLeft(find.text('+')), const Offset(30, 50));
+      },
+    );
+
+    testWidgets(
+      'a child which does not fit in an empty run ends the layout',
+      (tester) async {
+        late int remainingCount;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: OverflowView.flexible(
+              maxRuns: 3,
+              builder: (context, count) {
+                remainingCount = count;
+                return const _Text('+');
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B', width: 200),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        expect(remainingCount, 2);
+        expect(find.text('C'), findsNothing);
+        expect(tester.getTopLeft(find.text('+')), const Offset(50, 0));
+      },
+    );
+
+    testWidgets(
+      'children are laid out in columns when the direction is vertical',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 200,
+            height: 100,
+            child: OverflowView(
+              direction: Axis.vertical,
+              maxRuns: 2,
+              runSpacing: 10,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(0, 50));
+        expect(tester.getTopLeft(find.text('C')), const Offset(60, 0));
+      },
+    );
+
+    testWidgets(
+      'the layout is updated when maxRuns changes',
+      (tester) async {
+        Widget build(int maxRuns) {
+          return _boilerplate(
+            width: 100,
+            height: 200,
+            child: OverflowView(
+              maxRuns: maxRuns,
+              builder: (context, count) {
+                return const _Text('+');
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(1));
+        expect(find.text('C'), findsNothing);
+
+        await tester.pumpWidget(build(2));
+        expect(tester.getTopLeft(find.text('C')), const Offset(0, 50));
+      },
+    );
+  });
+
+  testWidgets(
+    'children which exactly fill the available space are all displayed',
+    (tester) async {
+      // 100 / 6 can't be represented exactly, so the sum of the children
+      // widths is slightly greater than 100.
+      const double width = 100 / 6;
+      for (final bool flexible in [false, true]) {
+        int buildCount = 0;
+        final List<Widget> children = [
+          for (final String text in ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+            _Text(text, width: width),
+        ];
+        Widget builder(BuildContext context, int count) {
+          buildCount++;
+          return const SizedBox();
+        }
+
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: flexible
+                ? OverflowView.flexible(
+                    maxRuns: 2,
+                    builder: builder,
+                    children: children,
+                  )
+                : OverflowView(
+                    maxRuns: 2,
+                    builder: builder,
+                    children: children,
+                  ),
+          ),
+        );
+
+        expect(buildCount, 0, reason: 'flexible: $flexible');
+        expect(tester.getTopLeft(find.text('F')).dy, 0);
+        expect(tester.getTopLeft(find.text('G')), const Offset(0, 50));
+      }
+    },
+  );
+
+  testWidgets(
+    'OverflowView never builds the overflow indicator with no remaining '
+    'children, even if it has already been built',
+    (tester) async {
+      final List<int> counts = <int>[];
+      Widget build(int childCount) {
+        return Center(
+          child: SizedBox(
+            width: 100,
+            child: OverflowView(
+              builder: (context, count) {
+                counts.add(count);
+                return const SizedBox();
+              },
+              children: [
+                for (int i = 0; i < childCount; i++)
+                  const SizedBox(width: 50),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(3));
+      await tester.pumpWidget(build(2));
+      await tester.pumpWidget(const SizedBox());
+
+      expect(counts, isNot(contains(0)));
+    },
+  );
+
+  testWidgets(
+    'the overflow indicator counts all the children when the first one does '
+    'not fit',
+    (tester) async {
+      late int remainingCount;
+      await tester.pumpWidget(
+        _boilerplate(
+          width: 100,
+          height: 100,
+          child: OverflowView(
+            builder: (context, count) {
+              remainingCount = count;
+              return const SizedBox();
+            },
+            children: [
+              const SizedBox(width: 150),
+              const SizedBox(width: 150),
+            ],
+          ),
+        ),
+      );
+
+      expect(remainingCount, 2);
+    },
+  );
+
+  testWidgets(
+    'the overflow indicator is positioned with its size for the final count',
+    (tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          width: 100,
+          height: 100,
+          child: OverflowView.flexible(
+            builder: (context, count) {
+              return _Text('+', width: count >= 3 ? 70 : 40);
+            },
+            children: [
+              for (final String text in ['A', 'B', 'C', 'D', 'E'])
+                _Text(text, width: 30),
+            ],
+          ),
+        ),
+      );
+
+      // With 2 hidden children, the 40 wide indicator fits after 'A' and 'B',
+      // but then it has to show 3 hidden children and becomes 70 wide.
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsNothing);
+      expect(tester.getTopLeft(find.text('+')), const Offset(30, 0));
+    },
+  );
 }
 
 Widget _boilerplate({
@@ -591,15 +1000,19 @@ class _Text extends StatelessWidget {
   const _Text(
     this.text, {
     Key? key,
+    this.width = 50,
+    this.height = 50,
   }) : super(key: key);
 
   final String text;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50,
-      width: 50,
+      height: height,
+      width: width,
       child: Text(text),
     );
   }

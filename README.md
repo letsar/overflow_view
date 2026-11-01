@@ -8,6 +8,7 @@ A widget displaying children in a line with an overflow indicator at the end if 
 * Has an overflow indicator builder so that you can display a widget showing the number of elements not rendered.
 * Can either constrain the children to the size of the first child or let them have the size they want.
 * Children can overlap each other by setting a negative spacing.
+* Children can be displayed in several runs (rows or columns), like in a `Wrap`.
 
 ![Overview][overview]
 
@@ -65,6 +66,25 @@ There are two constuctors depending on what you want to do.
 The `OverflowView` constructor will constrain all children to have the same size as the first one. This can be used for an avatar list for example.
 
 The `OverflowView.flexible` constructor will let all children to determine their own size. This is less performant than the default one, but it's more flexible. This can be used for a menu bar for example.
+
+### Runs
+
+By default, the children are displayed in a single line. Set `maxRuns` to display them in several runs, like in a `Wrap`: when a child doesn't fit at the end of a run, it starts a new one, until there are `maxRuns` runs. The overflow indicator is then displayed at the end of the last run.
+
+```dart
+OverflowView(
+  // Display the children in two rows at most.
+  maxRuns: 2,
+  // The amount of space between children in a run.
+  spacing: 4,
+  // The amount of space between runs.
+  runSpacing: 4,
+  children: <Widget>[...],
+  builder: (context, remaining) => Text('+$remaining'),
+)
+```
+
+Both constructors support runs.
 
 ## Sponsoring
 
