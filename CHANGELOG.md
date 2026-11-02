@@ -1,4 +1,4 @@
-## Unreleased
+## 0.7.0
 ### Added
 * [RTL support](https://github.com/letsar/overflow_view/issues/11): the children are laid out according to the ambient `Directionality`, which can be overridden with `textDirection`.
 
