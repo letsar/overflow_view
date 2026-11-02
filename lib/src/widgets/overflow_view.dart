@@ -28,6 +28,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Key? key,
     required OverflowIndicatorBuilder builder,
     Axis direction = Axis.horizontal,
+    TextDirection? textDirection,
     required List<Widget> children,
     double spacing = 0,
     double runSpacing = 0,
@@ -36,6 +37,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
           key: key,
           builder: builder,
           direction: direction,
+          textDirection: textDirection,
           children: children,
           spacing: spacing,
           runSpacing: runSpacing,
@@ -52,6 +54,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Key? key,
     required OverflowIndicatorBuilder builder,
     Axis direction = Axis.horizontal,
+    TextDirection? textDirection,
     required List<Widget> children,
     double spacing = 0,
     double runSpacing = 0,
@@ -60,6 +63,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
           key: key,
           builder: builder,
           direction: direction,
+          textDirection: textDirection,
           children: children,
           spacing: spacing,
           runSpacing: runSpacing,
@@ -71,6 +75,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     Key? key,
     required OverflowIndicatorBuilder builder,
     this.direction = Axis.horizontal,
+    this.textDirection,
     required List<Widget> children,
     this.spacing = 0,
     this.runSpacing = 0,
@@ -99,6 +104,14 @@ class OverflowView extends MultiChildRenderObjectWidget {
   /// children are placed adjacent to one another as in a [Row].
   final Axis direction;
 
+  /// Determines in which direction the children are placed when [direction]
+  /// is [Axis.horizontal], and in which direction the runs are placed when
+  /// [direction] is [Axis.vertical].
+  ///
+  /// Defaults to the ambient [Directionality], or to [TextDirection.ltr] if
+  /// there is none.
+  final TextDirection? textDirection;
+
   /// The amount of space between successive children in a run.
   final double spacing;
 
@@ -116,6 +129,12 @@ class OverflowView extends MultiChildRenderObjectWidget {
 
   final OverflowViewLayoutBehavior _layoutBehavior;
 
+  TextDirection _getTextDirection(BuildContext context) {
+    return textDirection ??
+        Directionality.maybeOf(context) ??
+        TextDirection.ltr;
+  }
+
   @override
   _OverflowViewElement createElement() {
     return _OverflowViewElement(this);
@@ -125,6 +144,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
   RenderOverflowView createRenderObject(BuildContext context) {
     return RenderOverflowView(
       direction: direction,
+      textDirection: _getTextDirection(context),
       spacing: spacing,
       runSpacing: runSpacing,
       maxRuns: maxRuns,
@@ -139,6 +159,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
   ) {
     renderObject
       ..direction = direction
+      ..textDirection = _getTextDirection(context)
       ..spacing = spacing
       ..runSpacing = runSpacing
       ..maxRuns = maxRuns

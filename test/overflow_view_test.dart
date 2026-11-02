@@ -1048,6 +1048,241 @@ void main() {
       expect(tester.getTopLeft(find.text('+')), const Offset(30, 0));
     },
   );
+
+  group('text direction', () {
+    testWidgets(
+      'children are laid out from right to left in RTL',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            textDirection: TextDirection.rtl,
+            child: OverflowView(
+              builder: (context, count) {
+                return const _Text('+');
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        expect(tester.getTopLeft(find.text('A')), const Offset(50, 0));
+        expect(find.text('B'), findsNothing);
+        expect(tester.getTopLeft(find.text('+')), const Offset(0, 0));
+      },
+    );
+
+    testWidgets(
+      'children of OverflowView.flexible are laid out from right to left in '
+      'RTL',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            textDirection: TextDirection.rtl,
+            child: OverflowView.flexible(
+              spacing: 10,
+              builder: (context, count) {
+                return const _Text('+', width: 20);
+              },
+              children: [
+                const _Text('A', width: 30),
+                const _Text('B', width: 40),
+                const _Text('C', width: 40),
+              ],
+            ),
+          ),
+        );
+
+        // There is no room for the indicator after 'B', so 'B' is hidden.
+        expect(tester.getTopLeft(find.text('A')), const Offset(70, 0));
+        expect(find.text('B'), findsNothing);
+        expect(tester.getTopLeft(find.text('+')), const Offset(40, 0));
+      },
+    );
+
+    testWidgets(
+      'runs are laid out from right to left in RTL',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            textDirection: TextDirection.rtl,
+            child: OverflowView(
+              maxRuns: 2,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        expect(tester.getTopLeft(find.text('A')), const Offset(50, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(0, 0));
+        expect(tester.getTopLeft(find.text('C')), const Offset(50, 50));
+      },
+    );
+
+    testWidgets(
+      'vertical runs are laid out from right to left in RTL',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 200,
+            height: 100,
+            textDirection: TextDirection.rtl,
+            child: OverflowView(
+              direction: Axis.vertical,
+              maxRuns: 2,
+              runSpacing: 10,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          ),
+        );
+
+        expect(tester.getTopLeft(find.text('A')), const Offset(150, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(150, 50));
+        expect(tester.getTopLeft(find.text('C')), const Offset(90, 0));
+      },
+    );
+
+    testWidgets(
+      'textDirection overrides the ambient Directionality',
+      (tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            textDirection: TextDirection.rtl,
+            child: OverflowView(
+              textDirection: TextDirection.ltr,
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+              ],
+            ),
+          ),
+        );
+
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(50, 0));
+      },
+    );
+
+    testWidgets(
+      'children are laid out from left to right without Directionality',
+      (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: OverflowView(
+                builder: (context, count) {
+                  return const SizedBox();
+                },
+                children: [
+                  const SizedBox(key: ValueKey('A'), width: 50, height: 50),
+                  const SizedBox(key: ValueKey('B'), width: 50, height: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(tester.getTopLeft(find.byKey(const ValueKey('A'))), Offset.zero);
+        expect(
+          tester.getTopLeft(find.byKey(const ValueKey('B'))),
+          const Offset(50, 0),
+        );
+      },
+    );
+
+    testWidgets(
+      'the layout is updated when the ambient Directionality changes',
+      (tester) async {
+        Widget build(TextDirection textDirection) {
+          return _boilerplate(
+            width: 100,
+            height: 100,
+            textDirection: textDirection,
+            child: OverflowView(
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(TextDirection.ltr));
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+
+        await tester.pumpWidget(build(TextDirection.rtl));
+        expect(tester.getTopLeft(find.text('A')), const Offset(50, 0));
+      },
+    );
+
+    testWidgets(
+      'a tap on a child is dispatched to it in RTL',
+      (tester) async {
+        final List<String> tappedChildren = <String>[];
+        Widget buildChild(String text) {
+          return GestureDetector(
+            onTap: () => tappedChildren.add(text),
+            child: _Text(text),
+          );
+        }
+
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 100,
+            textDirection: TextDirection.rtl,
+            child: OverflowView(
+              builder: (context, count) {
+                return const SizedBox();
+              },
+              children: [
+                buildChild('A'),
+                buildChild('B'),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tapAt(const Offset(75, 25));
+        expect(tappedChildren, ['A']);
+      },
+    );
+  });
 }
 
 Widget _boilerplate({
@@ -1055,9 +1290,10 @@ Widget _boilerplate({
   required double height,
   required Widget child,
   VoidCallback? onTap,
+  TextDirection textDirection = TextDirection.ltr,
 }) {
   return Directionality(
-    textDirection: TextDirection.ltr,
+    textDirection: textDirection,
     child: Align(
       alignment: Alignment.topLeft,
       child: GestureDetector(

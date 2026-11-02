@@ -9,6 +9,7 @@ A widget displaying children in a line with an overflow indicator at the end if 
 * Can either constrain the children to the size of the first child or let them have the size they want.
 * Children can overlap each other by setting a negative spacing.
 * Children can be displayed in several runs (rows or columns), like in a `Wrap`.
+* Supports right-to-left layouts.
 
 ![Overview][overview]
 
@@ -85,6 +86,10 @@ OverflowView(
 ```
 
 Both constructors support runs.
+
+### Right-to-left
+
+The children are laid out according to the ambient `Directionality`: in a right-to-left context, they go from right to left and the overflow indicator is on the left. You can override it with `textDirection`. Without any `Directionality`, the children go from left to right.
 
 ## Sponsoring
 

@@ -21,6 +21,7 @@ class RenderOverflowView extends RenderBox
   RenderOverflowView({
     List<RenderBox>? children,
     required Axis direction,
+    required TextDirection textDirection,
     required double spacing,
     required double runSpacing,
     required int maxRuns,
@@ -30,6 +31,7 @@ class RenderOverflowView extends RenderBox
             runSpacing < double.infinity),
         assert(maxRuns >= 1),
         _direction = direction,
+        _textDirection = textDirection,
         _spacing = spacing,
         _runSpacing = runSpacing,
         _maxRuns = maxRuns,
@@ -44,6 +46,15 @@ class RenderOverflowView extends RenderBox
     if (_direction != value) {
       _direction = value;
       _isHorizontal = direction == Axis.horizontal;
+      markNeedsLayout();
+    }
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection != value) {
+      _textDirection = value;
       markNeedsLayout();
     }
   }
@@ -254,6 +265,21 @@ class RenderOverflowView extends RenderBox
         contentBounds.top < -tolerance ||
         contentBounds.right > size.width + tolerance ||
         contentBounds.bottom > size.height + tolerance;
+
+    // In RTL, the layout is the mirror image of the LTR one: horizontally,
+    // children go from right to left, and vertically, runs go from right to
+    // left.
+    if (textDirection == TextDirection.rtl) {
+      for (final RenderBox child in onstageChildren) {
+        final OverflowViewParentData childParentData =
+            child.parentData as OverflowViewParentData;
+        final Offset offset = childParentData.offset;
+        childParentData.offset = Offset(
+          size.width - offset.dx - child.size.width,
+          offset.dy,
+        );
+      }
+    }
   }
 
   void resetOffstage() {

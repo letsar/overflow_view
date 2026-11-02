@@ -59,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int maxRuns = 1;
   double spacing = -40;
   double runSpacing = 4;
+  bool rtl = false;
 
   void _incrementCounter() {
     setState(() {
@@ -71,73 +72,60 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          Text('RTL'),
+          Switch(
+            value: rtl,
+            onChanged: (value) => setState(() {
+              rtl = value;
+            }),
+          ),
+        ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'People',
-                style: TextStyle(fontSize: 20),
-              ),
-              _SliderRow(
-                label: 'Runs: $maxRuns',
-                value: maxRuns.toDouble(),
-                min: 1,
-                max: 3,
-                onChanged: (value) => setState(() {
-                  maxRuns = value.round();
-                }),
-              ),
-              _SliderRow(
-                label: 'Spacing: ${spacing.round()}',
-                value: spacing,
-                min: -40,
-                max: 20,
-                onChanged: (value) => setState(() {
-                  spacing = value;
-                }),
-              ),
-              _SliderRow(
-                label: 'Run spacing: ${runSpacing.round()}',
-                value: runSpacing,
-                min: -40,
-                max: 20,
-                onChanged: (value) => setState(() {
-                  runSpacing = value;
-                }),
-              ),
-              SizedBox(height: 12),
-              OverflowView.flexible(
-                maxRuns: maxRuns,
-                spacing: spacing,
-                runSpacing: runSpacing,
-                children: <Widget>[
-                  for (int i = 0; i < _counter; i++)
-                    AvatarWidget(
-                      text: avatars[i].initials,
-                      color: avatars[i].color,
-                    )
-                ],
-                builder: (context, remaining) {
-                  return AvatarWidget(
-                    text: '+$remaining',
-                    color: Colors.red,
-                  );
-                },
-              ),
-              SizedBox(height: 20),
-              FractionallySizedBox(
-                widthFactor: ratio,
-                child: CommandBar(),
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: OverflowView(
-                  direction: Axis.vertical,
-                  spacing: 4,
+      body: Directionality(
+        textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'People',
+                  style: TextStyle(fontSize: 20),
+                ),
+                _SliderRow(
+                  label: 'Runs: $maxRuns',
+                  value: maxRuns.toDouble(),
+                  min: 1,
+                  max: 3,
+                  onChanged: (value) => setState(() {
+                    maxRuns = value.round();
+                  }),
+                ),
+                _SliderRow(
+                  label: 'Spacing: ${spacing.round()}',
+                  value: spacing,
+                  min: -40,
+                  max: 20,
+                  onChanged: (value) => setState(() {
+                    spacing = value;
+                  }),
+                ),
+                _SliderRow(
+                  label: 'Run spacing: ${runSpacing.round()}',
+                  value: runSpacing,
+                  min: -40,
+                  max: 20,
+                  onChanged: (value) => setState(() {
+                    runSpacing = value;
+                  }),
+                ),
+                SizedBox(height: 12),
+                OverflowView.flexible(
+                  maxRuns: maxRuns,
+                  spacing: spacing,
+                  runSpacing: runSpacing,
                   children: <Widget>[
                     for (int i = 0; i < _counter; i++)
                       AvatarWidget(
@@ -146,70 +134,95 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                   ],
                   builder: (context, remaining) {
-                    return SizedBox(
-                      height: 80,
-                      width: 80,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          if (remaining > 0)
-                            AvatarOverview(
-                              position: 0,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          if (remaining > 1)
-                            AvatarOverview(
-                              position: 1,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          if (remaining > 2)
-                            AvatarOverview(
-                              position: 2,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          if (remaining > 3)
-                            AvatarOverview(
-                              position: 3,
-                              remaining: remaining,
-                              counter: _counter,
-                            ),
-                          Positioned.fill(
-                            child: Center(
-                              child: FractionallySizedBox(
-                                alignment: Alignment.center,
-                                widthFactor: 0.5,
-                                heightFactor: 0.5,
-                                child: FittedBox(
-                                  child: AvatarWidget(
-                                    text: '+$remaining',
-                                    color: Colors.black.withOpacity(0.9),
+                    return AvatarWidget(
+                      text: '+$remaining',
+                      color: Colors.red,
+                    );
+                  },
+                ),
+                SizedBox(height: 20),
+                FractionallySizedBox(
+                  widthFactor: ratio,
+                  child: CommandBar(),
+                ),
+                SizedBox(height: 20),
+                Expanded(
+                  child: OverflowView(
+                    direction: Axis.vertical,
+                    spacing: 4,
+                    children: <Widget>[
+                      for (int i = 0; i < _counter; i++)
+                        AvatarWidget(
+                          text: avatars[i].initials,
+                          color: avatars[i].color,
+                        )
+                    ],
+                    builder: (context, remaining) {
+                      return SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (remaining > 0)
+                              AvatarOverview(
+                                position: 0,
+                                remaining: remaining,
+                                counter: _counter,
+                              ),
+                            if (remaining > 1)
+                              AvatarOverview(
+                                position: 1,
+                                remaining: remaining,
+                                counter: _counter,
+                              ),
+                            if (remaining > 2)
+                              AvatarOverview(
+                                position: 2,
+                                remaining: remaining,
+                                counter: _counter,
+                              ),
+                            if (remaining > 3)
+                              AvatarOverview(
+                                position: 3,
+                                remaining: remaining,
+                                counter: _counter,
+                              ),
+                            Positioned.fill(
+                              child: Center(
+                                child: FractionallySizedBox(
+                                  alignment: Alignment.center,
+                                  widthFactor: 0.5,
+                                  heightFactor: 0.5,
+                                  child: FittedBox(
+                                    child: AvatarWidget(
+                                      text: '+$remaining',
+                                      color: Colors.black.withOpacity(0.9),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              // Slider(
-              //   value: ratio,
-              //   min: 0,
-              //   max: 1,
-              //   divisions: 100,
-              //   onChanged: (value) {
-              //     setState(() {
-              //       ratio = value;
-              //     });
-              //   },
-              // ),
-              SizedBox(height: 40),
-            ],
+                // Slider(
+                //   value: ratio,
+                //   min: 0,
+                //   max: 1,
+                //   divisions: 100,
+                //   onChanged: (value) {
+                //     setState(() {
+                //       ratio = value;
+                //     });
+                //   },
+                // ),
+                SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
