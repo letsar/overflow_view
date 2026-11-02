@@ -1,3 +1,10 @@
+## Unreleased
+### Added
+* [RTL support](https://github.com/letsar/overflow_view/issues/11): the children are laid out according to the ambient `Directionality`, which can be overridden with `textDirection`.
+
+### Changed
+* In a right-to-left `Directionality`, the children are now laid out from right to left, with the overflow indicator on the left. To keep the previous layout, set `textDirection: TextDirection.ltr`.
+
 ## 0.6.0
 ### Added
 * [Wrapped items](https://github.com/letsar/overflow_view/issues/2): `maxRuns` and `runSpacing` display the children in several runs, with the overflow indicator at the end of the last one.
