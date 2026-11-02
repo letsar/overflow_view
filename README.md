@@ -91,6 +91,31 @@ Both constructors support runs.
 
 The children are laid out according to the ambient `Directionality`: in a right-to-left context, they go from right to left and the overflow indicator is on the left. You can override it with `textDirection`. Without any `Directionality`, the children go from left to right.
 
+### Hiding the first children
+
+By default, the last children are hidden when there is not enough space. To hide the first ones instead, and keep the last ones visible (for a breadcrumb for example), reverse the children and the text direction:
+
+```dart
+// In a left-to-right context.
+Align(
+  alignment: Alignment.centerLeft,
+  child: OverflowView(
+    textDirection: TextDirection.rtl,
+    children: <Widget>[
+      for (final item in items.reversed) ItemWidget(item),
+    ],
+    // The hidden items are the first `remaining` ones.
+    builder: (context, remaining) => Text('+$remaining'),
+  ),
+)
+```
+
+The children keep their order from left to right, and the overflow indicator is on the left. `textDirection` only changes how `OverflowView` places its children: their own text is still laid out from left to right.
+
+In a right-to-left context, use `TextDirection.ltr` and `Alignment.centerRight` instead. The breadcrumb in the example handles both.
+
+The `Align` lets the `OverflowView` be as wide as its children. Without it, if the `OverflowView` is forced to be wider than its children, they are aligned to its right edge, as in any right-to-left layout.
+
 ## Sponsoring
 
 I'm working on my packages on my free-time, but I don't have as much time as I would. If this package or any other package I created is helping you, please consider to sponsor me. By doing so, I will prioritize your issues or your pull-requests before the others. 

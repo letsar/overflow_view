@@ -146,6 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: CommandBar(),
                 ),
                 SizedBox(height: 20),
+                Breadcrumb(),
+                SizedBox(height: 20),
                 Expanded(
                   child: OverflowView(
                     direction: Axis.vertical,
@@ -408,6 +410,124 @@ class _MenuItem extends StatelessWidget {
           if (data.icon != null && data.label != null) SizedBox(width: 8),
           if (data.label != null) Text(data.label!),
         ],
+      ),
+    );
+  }
+}
+
+class Breadcrumb extends StatefulWidget {
+  const Breadcrumb({Key? key}) : super(key: key);
+
+  @override
+  State<Breadcrumb> createState() => _BreadcrumbState();
+}
+
+class _BreadcrumbState extends State<Breadcrumb> {
+  static const List<String> path = <String>[
+    'Home',
+    'Documents',
+    'Projects',
+    'Flutter',
+    'overflow_view',
+    'lib',
+    'src',
+  ];
+
+  bool hideFirst = true;
+  double widthPercent = 70;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Breadcrumb', style: TextStyle(fontSize: 20)),
+            Spacer(),
+            Text('Hide first items'),
+            Switch(
+              value: hideFirst,
+              onChanged: (value) => setState(() {
+                hideFirst = value;
+              }),
+            ),
+          ],
+        ),
+        _SliderRow(
+          label: 'Width: ${widthPercent.round()}%',
+          value: widthPercent,
+          min: 20,
+          max: 100,
+          onChanged: (value) => setState(() {
+            widthPercent = value;
+          }),
+        ),
+        FractionallySizedBox(
+          widthFactor: widthPercent / 100,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            // Lets the OverflowView be as wide as its children.
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: hideFirst ? _buildHidingFirst() : _buildHidingLast(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The default behavior: the last items are hidden.
+  Widget _buildHidingLast() {
+    return OverflowView.flexible(
+      spacing: 4,
+      children: <Widget>[
+        for (final String item in path) Chip(label: Text(item)),
+      ],
+      builder: (context, remaining) {
+        return _Indicator(hiddenItems: path.skip(path.length - remaining));
+      },
+    );
+  }
+
+  /// The first items are hidden by reversing both the children and the text
+  /// direction.
+  Widget _buildHidingFirst() {
+    final TextDirection textDirection = Directionality.of(context);
+    return OverflowView.flexible(
+      textDirection: textDirection == TextDirection.ltr
+          ? TextDirection.rtl
+          : TextDirection.ltr,
+      spacing: 4,
+      children: <Widget>[
+        for (final String item in path.reversed) Chip(label: Text(item)),
+      ],
+      builder: (context, remaining) {
+        return _Indicator(hiddenItems: path.take(remaining));
+      },
+    );
+  }
+}
+
+class _Indicator extends StatelessWidget {
+  const _Indicator({Key? key, required this.hiddenItems}) : super(key: key);
+
+  final Iterable<String> hiddenItems;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      tooltip: 'Hidden items',
+      itemBuilder: (context) => <PopupMenuEntry<String>>[
+        for (final String item in hiddenItems)
+          PopupMenuItem<String>(value: item, child: Text(item)),
+      ],
+      child: Chip(
+        backgroundColor: Colors.red.shade100,
+        label: Text('+${hiddenItems.length}'),
       ),
     );
   }
