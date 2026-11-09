@@ -24,20 +24,20 @@ class RenderOverflowView extends RenderBox
     required int maxRuns,
     required OverflowViewLayoutBehavior layoutBehavior,
     required int? maxCount,
-  }) : assert(spacing > double.negativeInfinity && spacing < double.infinity),
-       assert(
-         runSpacing > double.negativeInfinity && runSpacing < double.infinity,
-       ),
-       assert(maxRuns >= 1),
-       assert(maxCount == null || maxCount >= 0),
-       _direction = direction,
-       _textDirection = textDirection,
-       _spacing = spacing,
-       _runSpacing = runSpacing,
-       _maxRuns = maxRuns,
-       _layoutBehavior = layoutBehavior,
-       _maxCount = maxCount,
-       _isHorizontal = direction == Axis.horizontal {
+  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+        assert(
+          runSpacing > double.negativeInfinity && runSpacing < double.infinity,
+        ),
+        assert(maxRuns >= 1),
+        assert(maxCount == null || maxCount >= 0),
+        _direction = direction,
+        _textDirection = textDirection,
+        _spacing = spacing,
+        _runSpacing = runSpacing,
+        _maxRuns = maxRuns,
+        _layoutBehavior = layoutBehavior,
+        _maxCount = maxCount,
+        _isHorizontal = direction == Axis.horizontal {
     addAll(children);
   }
 
@@ -140,9 +140,8 @@ class RenderOverflowView extends RenderBox
     resetOffstage();
 
     final bool isFixed = layoutBehavior == OverflowViewLayoutBehavior.fixed;
-    final double maxCrossExtent = _isHorizontal
-        ? constraints.maxHeight
-        : constraints.maxWidth;
+    final double maxCrossExtent =
+        _isHorizontal ? constraints.maxHeight : constraints.maxWidth;
     final _Runs runs = _Runs(
       maxExtent: _isHorizontal ? constraints.maxWidth : constraints.maxHeight,
       spacing: spacing,
@@ -159,12 +158,18 @@ class RenderOverflowView extends RenderBox
     BoxConstraints childConstraints = isFixed
         ? constraints.loosen()
         : _isHorizontal
-        ? BoxConstraints(maxHeight: maxCrossExtent)
-        : BoxConstraints(maxWidth: maxCrossExtent);
+            ? BoxConstraints(maxHeight: maxCrossExtent)
+            : BoxConstraints(maxWidth: maxCrossExtent);
     double? fixedExtent;
 
     RenderBox child = firstChild!;
+    final int? maxCount = _maxCount;
     while (child != overflowIndicator) {
+      if (maxCount != null && onstageChildren.length >= maxCount) {
+        // Hit max count, so we cannot render any further child.
+        break;
+      }
+
       final double? mainOffset;
       if (fixedExtent == null) {
         child.layout(childConstraints, parentUsesSize: true);
@@ -196,8 +201,7 @@ class RenderOverflowView extends RenderBox
     if (unRenderedChildCount > 0) {
       while (true) {
         final int indicatorCount = unRenderedChildCount;
-        final double indicatorExtent =
-            fixedExtent ??
+        final double indicatorExtent = fixedExtent ??
             _layoutOverflowIndicator(indicatorCount, childConstraints);
 
         // We hide the last children until there is room for the indicator.
@@ -275,8 +279,7 @@ class RenderOverflowView extends RenderBox
       _getSize(runs.extent, crossOffset - runSpacing),
     );
     const double tolerance = precisionErrorTolerance;
-    _hasOverflow =
-        contentBounds.left < -tolerance ||
+    _hasOverflow = contentBounds.left < -tolerance ||
         contentBounds.top < -tolerance ||
         contentBounds.right > size.width + tolerance ||
         contentBounds.bottom > size.height + tolerance;
