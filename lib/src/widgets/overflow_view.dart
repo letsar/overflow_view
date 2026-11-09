@@ -36,7 +36,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     double spacing = 0,
     double runSpacing = 0,
     int maxRuns = 1,
-    int? maxCount = null,
+    int? maxCount,
   }) : this._all(
           key: key,
           builder: builder,
@@ -64,7 +64,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     double spacing = 0,
     double runSpacing = 0,
     int maxRuns = 1,
-    int? maxCount = null,
+    int? maxCount,
   }) : this._all(
           key: key,
           builder: builder,
@@ -87,7 +87,7 @@ class OverflowView extends MultiChildRenderObjectWidget {
     this.spacing = 0,
     this.runSpacing = 0,
     this.maxRuns = 1,
-    this.maxCount = null,
+    this.maxCount,
     required OverflowViewLayoutBehavior layoutBehavior,
   })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
         assert(

@@ -102,6 +102,7 @@ class RenderOverflowView extends RenderBox
   int? get maxCount => _maxCount;
   int? _maxCount;
   set maxCount(int? value) {
+    assert(value == null || value >= 0);
     if (_maxCount != value) {
       _maxCount = value;
       markNeedsLayout();

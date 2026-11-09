@@ -1,3 +1,7 @@
+## Unreleased
+### Added
+* `maxCount` property, which can be used to force the overflow indicator to appear once a number of items is reached, even if sufficient space remains for more.
+
 ## 0.7.0
 ### Added
 * [RTL support](https://github.com/letsar/overflow_view/issues/11): the children are laid out according to the ambient `Directionality`, which can be overridden with `textDirection`.
@@ -26,7 +30,7 @@
 ### Changed
 * Update Flutter constraints.
 * Update version of value_layout_builder.
-  
+
 ### Fixed
 * Flutter 3.32 breaking changes issue.
 

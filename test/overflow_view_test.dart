@@ -42,6 +42,61 @@ void main() {
   );
 
   testWidgets(
+    'the overflow indicator is built if there is not enough room',
+    (tester) async {
+      int buildCount = 0;
+      late int remainingCount;
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 100,
+            child: OverflowView(
+              builder: (context, count) {
+                buildCount++;
+                remainingCount = count;
+                return const SizedBox();
+              },
+              children: [
+                const SizedBox(width: 50),
+                const SizedBox(width: 50),
+                const SizedBox(width: 50),
+                const SizedBox(width: 50),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(buildCount, 1);
+      expect(remainingCount, 3);
+
+      buildCount = 0;
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 100,
+            child: OverflowView.flexible(
+              builder: (context, count) {
+                buildCount++;
+                remainingCount = count;
+                return const SizedBox(width: 30);
+              },
+              children: [
+                const SizedBox(width: 50),
+                const SizedBox(width: 20),
+                const SizedBox(width: 50),
+                const SizedBox(width: 50),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(buildCount, 1);
+      expect(remainingCount, 2);
+    },
+  );
+
+  testWidgets(
     'children are layed out according to direction',
     (tester) async {
       await tester.pumpWidget(
