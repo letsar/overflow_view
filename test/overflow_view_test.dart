@@ -1,11 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:overflow_view/overflow_view.dart';
 
 void main() {
   testWidgets(
-    'the overflow indicator is not built if there is enough room',
+    'the overflow indicator is not built if there is enough room and max count is not set',
     (tester) async {
       int buildCount = 0;
       await tester.pumpWidget(
@@ -39,61 +38,6 @@ void main() {
         ),
       );
       expect(buildCount, 0);
-    },
-  );
-
-  testWidgets(
-    'the overflow indicator is built if there is not enough room',
-    (tester) async {
-      int buildCount = 0;
-      late int remainingCount;
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 100,
-            child: OverflowView(
-              builder: (context, count) {
-                buildCount++;
-                remainingCount = count;
-                return const SizedBox();
-              },
-              children: [
-                const SizedBox(width: 50),
-                const SizedBox(width: 50),
-                const SizedBox(width: 50),
-                const SizedBox(width: 50),
-              ],
-            ),
-          ),
-        ),
-      );
-      expect(buildCount, 1);
-      expect(remainingCount, 3);
-
-      buildCount = 0;
-
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 100,
-            child: OverflowView.flexible(
-              builder: (context, count) {
-                buildCount++;
-                remainingCount = count;
-                return const SizedBox(width: 30);
-              },
-              children: [
-                const SizedBox(width: 50),
-                const SizedBox(width: 20),
-                const SizedBox(width: 50),
-                const SizedBox(width: 50),
-              ],
-            ),
-          ),
-        ),
-      );
-      expect(buildCount, 1);
-      expect(remainingCount, 2);
     },
   );
 
@@ -563,6 +507,288 @@ void main() {
     );
   });
 
+  group('maxCount', () {
+    testWidgets(
+      'the overflow indicator is not built if there is enough room and max count is set to something higher than the child count',
+      (tester) async {
+        int buildCount = 0;
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView(
+                builder: (context, count) {
+                  buildCount++;
+                  return const SizedBox();
+                },
+                maxCount: 5,
+                children: [const SizedBox(width: 100)],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 0);
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView.flexible(
+                builder: (context, count) {
+                  buildCount++;
+                  return const SizedBox();
+                },
+                maxCount: 5,
+                children: [const SizedBox(width: 100)],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 0);
+      },
+    );
+
+    testWidgets(
+      'the overflow indicator is built if there is not enough room and max count is higher than the number of children that can be fit',
+      (tester) async {
+        int buildCount = 0;
+        late int remainingCount;
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView(
+                builder: (context, count) {
+                  buildCount++;
+                  remainingCount = count;
+                  return const SizedBox();
+                },
+                maxCount: 3,
+                children: [
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 1);
+        expect(remainingCount, 3);
+
+        buildCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView.flexible(
+                builder: (context, count) {
+                  buildCount++;
+                  remainingCount = count;
+                  return const SizedBox(width: 30);
+                },
+                maxCount: 5,
+                children: [
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 20),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 1);
+        expect(remainingCount, 2);
+      },
+    );
+
+    testWidgets(
+      'the overflow indicator is built if max count is reached despite having sufficient room for more children',
+      (tester) async {
+        int buildCount = 0;
+        late int remainingCount;
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 1000,
+              child: OverflowView(
+                builder: (context, count) {
+                  buildCount++;
+                  remainingCount = count;
+                  return const SizedBox();
+                },
+                maxCount: 2,
+                children: [
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 1);
+        expect(remainingCount, 2);
+
+        buildCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 1000,
+              child: OverflowView.flexible(
+                builder: (context, count) {
+                  buildCount++;
+                  remainingCount = count;
+                  return const SizedBox(width: 30);
+                },
+                maxCount: 2,
+                children: [
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 20),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 1);
+        expect(remainingCount, 2);
+      },
+    );
+
+    testWidgets(
+      'the overflow indicator is not built if max count is zero and there are no children',
+      (tester) async {
+        int buildCount = 0;
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView(
+                builder: (context, count) {
+                  buildCount++;
+                  return const SizedBox();
+                },
+                maxCount: 0,
+                children: [],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 0);
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView.flexible(
+                builder: (context, count) {
+                  buildCount++;
+                  return const SizedBox(width: 30);
+                },
+                maxCount: 0,
+                children: [],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 0);
+      },
+    );
+
+    testWidgets(
+      'the overflow indicator is built if max count is zero and there is more than one child',
+      (tester) async {
+        int buildCount = 0;
+        late int remainingCount;
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView(
+                builder: (context, count) {
+                  buildCount++;
+                  remainingCount = count;
+                  return const SizedBox();
+                },
+                maxCount: 0,
+                children: [
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 1);
+        expect(remainingCount, 4);
+
+        buildCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 100,
+              child: OverflowView.flexible(
+                builder: (context, count) {
+                  buildCount++;
+                  remainingCount = count;
+                  return const SizedBox(width: 30);
+                },
+                maxCount: 0,
+                children: [
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 20),
+                  const SizedBox(width: 50),
+                  const SizedBox(width: 50),
+                ],
+              ),
+            ),
+          ),
+        );
+        expect(buildCount, 1);
+        expect(remainingCount, 4);
+      },
+    );
+
+    testWidgets(
+      'the layout is updated when maxCount changes',
+      (tester) async {
+        Widget build(int maxCount) {
+          return _boilerplate(
+            width: 200,
+            height: 100,
+            child: OverflowView(
+              maxCount: maxCount,
+              builder: (context, count) {
+                return const _Text('+');
+              },
+              children: [
+                const _Text('A'),
+                const _Text('B'),
+                const _Text('C'),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(2));
+        expect(find.text('C'), findsNothing);
+
+        await tester.pumpWidget(build(3));
+        expect(tester.getTopLeft(find.text('C')), const Offset(100, 0));
+      },
+    );
+  });
+
   group('runs', () {
     testWidgets(
       'children are laid out in several runs when maxRuns is greater than 1',
@@ -756,6 +982,43 @@ void main() {
         expect(find.text('D'), findsOneWidget);
         expect(find.text('E'), findsNothing);
         expect(tester.getTopLeft(find.text('+')), const Offset(30, 50));
+      },
+    );
+
+    testWidgets(
+      'hitting max count ends the layout',
+      (tester) async {
+        int buildCount = 0;
+        await tester.pumpWidget(
+          _boilerplate(
+            width: 100,
+            height: 200,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: OverflowView(
+                maxRuns: 2,
+                builder: (context, count) {
+                  buildCount++;
+                  return const SizedBox();
+                },
+                maxCount: 3,
+                children: [
+                  const _Text('A'),
+                  const _Text('B'),
+                  const _Text('C'),
+                  const _Text('D'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(buildCount, 1);
+        expect(tester.getTopLeft(find.text('A')), const Offset(0, 0));
+        expect(tester.getTopLeft(find.text('B')), const Offset(50, 0));
+        expect(tester.getTopLeft(find.text('C')), const Offset(0, 50));
+        expect(find.text('D'), findsNothing);
+        expect(tester.getSize(find.byType(OverflowView)), const Size(100, 100));
       },
     );
 

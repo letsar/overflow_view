@@ -10,14 +10,17 @@ typedef OverflowIndicatorBuilder = Widget Function(
 );
 
 /// A widget that displays its children in a one-dimensional array until there
-/// is no more room. If all the children don't fit in the available space, it
-/// displays an indicator at the end.
+/// is no more room, or until a maximum number of children is reached. If all
+/// the children don't fit in the available space, or if the maximum number of
+/// children to display is reached, it displays an indicator at the end.
+///
+/// `maxCount` controls the maximum number of children that will be displayed
+/// before an indicator is displayed, even if there is sufficient room to
+/// display more children.
 ///
 /// The children can also be displayed in several runs, like in a [Wrap], by
 /// setting `maxRuns`. In that case, the indicator is at the end of the last
 /// run.
-///
-/// All chidren will have the same size as the first child.
 class OverflowView extends MultiChildRenderObjectWidget {
   /// Creates an [OverflowView].
   ///
@@ -35,17 +38,17 @@ class OverflowView extends MultiChildRenderObjectWidget {
     int maxRuns = 1,
     int? maxCount = null,
   }) : this._all(
-         key: key,
-         builder: builder,
-         direction: direction,
-         textDirection: textDirection,
-         children: children,
-         spacing: spacing,
-         runSpacing: runSpacing,
-         maxRuns: maxRuns,
-         layoutBehavior: OverflowViewLayoutBehavior.fixed,
-         maxCount: maxCount,
-       );
+          key: key,
+          builder: builder,
+          direction: direction,
+          textDirection: textDirection,
+          children: children,
+          spacing: spacing,
+          runSpacing: runSpacing,
+          maxRuns: maxRuns,
+          layoutBehavior: OverflowViewLayoutBehavior.fixed,
+          maxCount: maxCount,
+        );
 
   /// Creates a flexible [OverflowView].
   ///
@@ -63,17 +66,17 @@ class OverflowView extends MultiChildRenderObjectWidget {
     int maxRuns = 1,
     int? maxCount = null,
   }) : this._all(
-         key: key,
-         builder: builder,
-         direction: direction,
-         textDirection: textDirection,
-         children: children,
-         spacing: spacing,
-         runSpacing: runSpacing,
-         maxRuns: maxRuns,
-         layoutBehavior: OverflowViewLayoutBehavior.flexible,
-         maxCount: maxCount,
-       );
+          key: key,
+          builder: builder,
+          direction: direction,
+          textDirection: textDirection,
+          children: children,
+          spacing: spacing,
+          runSpacing: runSpacing,
+          maxRuns: maxRuns,
+          layoutBehavior: OverflowViewLayoutBehavior.flexible,
+          maxCount: maxCount,
+        );
 
   OverflowView._all({
     Key? key,
@@ -86,24 +89,24 @@ class OverflowView extends MultiChildRenderObjectWidget {
     this.maxRuns = 1,
     this.maxCount = null,
     required OverflowViewLayoutBehavior layoutBehavior,
-  }) : assert(spacing > double.negativeInfinity && spacing < double.infinity),
-       assert(
-         runSpacing > double.negativeInfinity && runSpacing < double.infinity,
-       ),
-       assert(maxRuns >= 1),
-       assert(maxCount == null || maxCount >= 0),
-       _layoutBehavior = layoutBehavior,
-       super(
-         key: key,
-         children: [
-           ...children,
-           ValueLayoutBuilder<int>(
-             builder: (context, constraints) {
-               return builder(context, constraints.value);
-             },
-           ),
-         ],
-       );
+  })  : assert(spacing > double.negativeInfinity && spacing < double.infinity),
+        assert(
+          runSpacing > double.negativeInfinity && runSpacing < double.infinity,
+        ),
+        assert(maxRuns >= 1),
+        assert(maxCount == null || maxCount >= 0),
+        _layoutBehavior = layoutBehavior,
+        super(
+          key: key,
+          children: [
+            ...children,
+            ValueLayoutBuilder<int>(
+              builder: (context, constraints) {
+                return builder(context, constraints.value);
+              },
+            ),
+          ],
+        );
 
   /// The direction to use as the main axis.
   ///
@@ -160,8 +163,8 @@ class OverflowView extends MultiChildRenderObjectWidget {
       spacing: spacing,
       runSpacing: runSpacing,
       maxRuns: maxRuns,
-      layoutBehavior: _layoutBehavior,
       maxCount: maxCount,
+      layoutBehavior: _layoutBehavior,
     );
   }
 
