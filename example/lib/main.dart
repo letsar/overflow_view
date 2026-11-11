@@ -59,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int maxRuns = 1;
   double spacing = -40;
   double runSpacing = 4;
+  int? maxCount = null;
   bool rtl = false;
 
   void _incrementCounter() {
@@ -121,11 +122,22 @@ class _MyHomePageState extends State<MyHomePage> {
                     runSpacing = value;
                   }),
                 ),
+                _SliderRow(
+                  label:
+                      'Max count: ${maxCount == null ? '∞' : maxCount!.round()}',
+                  value: (maxCount ?? 0).toDouble(),
+                  min: 0,
+                  max: 20,
+                  onChanged: (value) => setState(() {
+                    maxCount = value == 0 ? null : value.toInt();
+                  }),
+                ),
                 SizedBox(height: 12),
                 OverflowView.flexible(
                   maxRuns: maxRuns,
                   spacing: spacing,
                   runSpacing: runSpacing,
+                  maxCount: maxCount,
                   children: <Widget>[
                     for (int i = 0; i < _counter; i++)
                       AvatarWidget(
@@ -199,7 +211,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: FittedBox(
                                     child: AvatarWidget(
                                       text: '+$remaining',
-                                      color: Colors.black.withOpacity(0.9),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.9),
                                     ),
                                   ),
                                 ),
